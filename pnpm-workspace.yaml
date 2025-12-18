@@ -1,0 +1,15 @@
+packages:
+  - apps/*
+  - packages/*
+ignoredBuiltDependencies:
+  - '@nestjs/core'
+  - '@parcel/watcher'
+  - '@swc/core'
+  - '@tailwindcss/oxide'
+  - bufferutil
+  - electron
+  - electron-winstaller
+  - esbuild
+  - nx
+  - unrs-resolver
+  - utf-8-validate

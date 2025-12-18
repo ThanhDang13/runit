@@ -1,0 +1,76 @@
+version: "3.8"
+
+services:
+  devcontainer:
+    image: mcr.microsoft.com/devcontainers/typescript-node:1-22-bookworm
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ../../runit:/workspace/runit:cached
+      - /workspace/runit/apps/api/node_modules
+      - /workspace/runit/apps/web/node_modules
+      - /workspace/runit/node_modules
+      - pnpm-store:/workspace/runit/.pnpm_store
+    depends_on:
+      - postgres
+      - piston
+    command: sleep infinity
+    networks:
+      - devnet
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - devnet
+
+  piston:
+    image: thangdang1353/runit-piston:packages-only
+    container_name: piston_api
+    privileged: true
+    ports:
+      - "2000:2000"
+    restart: unless-stopped
+    networks:
+      - devnet
+
+  # redis:
+  #   image: redis/redis-stack:latest
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8001:8001"
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis-data:/data
+  #   networks:
+  #     - devnet
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - devcontainer
+    networks:
+      - devnet
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  pnpm-store:
+  postgres-data:
+
+networks:
+  devnet:
