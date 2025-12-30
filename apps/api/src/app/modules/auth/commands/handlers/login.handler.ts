@@ -26,6 +26,10 @@ export class LoginHandler implements ICommandHandler<LoginCommand, AuthResponseD
       throw new UnauthorizedException("Invalid credentials");
     }
 
+    if (!user.active) {
+      throw new UnauthorizedException("Your account is inactive");
+    }
+
     const isPasswordValid = await verify(user.passwordHash, data.password);
 
     if (!isPasswordValid) {

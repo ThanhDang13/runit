@@ -1,4 +1,5 @@
 import { OffsetPaginated } from "@api/app/common/types/pagination";
+import { IsAdmin } from "@api/app/modules/auth/strategy/role.guard";
 import { CreateUserCommand } from "@api/app/modules/user/commands/create-user.command";
 import { DeleteUserCommand } from "@api/app/modules/user/commands/delete-user.command";
 import { UpdateUserCommand } from "@api/app/modules/user/commands/update-user.command";
@@ -19,6 +20,7 @@ import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ZodResponse } from "nestjs-zod";
 
 @Controller("v1/users")
+@IsAdmin()
 export class UserController {
   constructor(
     private readonly queryBus: QueryBus,

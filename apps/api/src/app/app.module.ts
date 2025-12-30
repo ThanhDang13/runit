@@ -10,6 +10,9 @@ import { ProblemModule } from "@api/app/modules/problem/problem.module";
 import { UserModule } from "@api/app/modules/user/user.module";
 import { AuthModule } from "@api/app/modules/auth/auth.module";
 import { SubmissionModule } from "@api/app/modules/submission/submission.module";
+import { RedisModule } from "@api/app/infrastructure/redis/redis.module";
+import { MailModule } from "@api/app/infrastructure/mailer/mailer.module";
+import { ContestModule } from "@api/app/modules/contest/contest.module";
 
 @Module({
   imports: [
@@ -22,7 +25,10 @@ import { SubmissionModule } from "@api/app/modules/submission/submission.module"
     ExecutionModule,
     ProblemModule,
     UserModule,
-    SubmissionModule
+    SubmissionModule,
+    ContestModule,
+    RedisModule,
+    MailModule
   ],
   controllers: [],
   providers: [

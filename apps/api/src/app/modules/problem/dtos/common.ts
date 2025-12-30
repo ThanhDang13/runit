@@ -6,7 +6,8 @@ export const ProblemSchema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   description: z.string().min(6, "Description must be at least 3 characters"),
   createdAt: z.iso.datetime(),
-  updatedAt: z.iso.datetime()
+  updatedAt: z.iso.datetime(),
+  status: z.literal(["solved", "attempted", "unsolved"]).optional()
 });
 
 export type Problem = z.infer<typeof ProblemSchema>;

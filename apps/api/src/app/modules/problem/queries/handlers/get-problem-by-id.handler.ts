@@ -1,5 +1,5 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
-import { problems } from "@api/app/infrastructure/database/schema";
+import { problems, testcases } from "@api/app/infrastructure/database/schema";
 import { PGDatabase } from "@api/app/infrastructure/database/database.service";
 import { Inject, NotFoundException } from "@nestjs/common";
 import { normalizeToIso } from "@api/app/common/helpers/common";
@@ -8,17 +8,20 @@ import { ProblemWithTestcases } from "@api/app/modules/problem/dtos/common";
 import { eq } from "drizzle-orm";
 
 @QueryHandler(GetProblemByIdQuery)
-export class GetProblemByIdHandler
-  implements IQueryHandler<GetProblemByIdQuery, ProblemWithTestcases>
-{
+export class GetProblemByIdHandler implements IQueryHandler<
+  GetProblemByIdQuery,
+  ProblemWithTestcases
+> {
   constructor(@Inject("PG") private readonly db: PGDatabase) {}
   async execute(query: GetProblemByIdQuery): Promise<ProblemWithTestcases> {
-    const { problemId } = query;
+    const { problemId, withHiddenCases } = query;
 
     const result = await this.db.query.problems.findFirst({
       where: eq(problems.id, problemId),
       with: {
-        testcases: true
+        testcases: {
+          where: withHiddenCases ? undefined : eq(testcases.isSample, true)
+        }
       }
     });
 

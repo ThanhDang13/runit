@@ -7,7 +7,8 @@ import {
   json,
   unique,
   customType,
-  pgEnum
+  pgEnum,
+  integer
 } from "drizzle-orm/pg-core";
 
 export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
@@ -50,6 +51,7 @@ export const users = pgTable(
     email: varchar("email", { length: 255 }).notNull(),
     name: varchar("name", { length: 255 }).notNull(),
     role: userRoleEnum("role").notNull().default("user"),
+    active: boolean("active").default(true).notNull(),
     passwordHash: text("password_hash").notNull(),
     ...timestamp
   },
@@ -87,11 +89,50 @@ export const submissions = pgTable("submissions", {
     .default(sql`gen_random_uuid()`)
     .notNull(),
   problemId: text("problem_id").notNull(),
+  contestId: text("contest_id"),
   userId: text("user_id").notNull(),
   language: varchar("language", { length: 50 }).notNull(),
   code: text("code").notNull(),
   status: varchar("status", { length: 50 }).notNull(),
   summary: json("summary"),
+  ...timestamp
+});
+
+// ------------------- CONTESTS -------------------
+
+export const contests = pgTable("contests", {
+  id: text("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`)
+    .notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  startTime: ISO8601Timestamp("start_time", { withTimezone: true }).notNull(),
+  endTime: ISO8601Timestamp("end_time", { withTimezone: true }).notNull(),
+  ...timestamp
+});
+
+export const contestProblems = pgTable("contest_problems", {
+  id: text("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`)
+    .notNull(),
+  contestId: text("contest_id").notNull(),
+  problemId: text("problem_id").notNull(),
+  order: integer("order").default(0).notNull(),
+  ...timestamp
+});
+
+export const contestParticipants = pgTable("contest_participants", {
+  id: text("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`)
+    .notNull(),
+  contestId: text("contest_id").notNull(),
+  userId: text("user_id").notNull(),
+  joinedAt: ISO8601Timestamp("joined_at", { withTimezone: true })
+    .default(sql`now()`)
+    .notNull(),
   ...timestamp
 });
 

@@ -9,7 +9,9 @@ function UserLayout() {
   return (
     <div className="flex h-full flex-col">
       <Navbar />
-      <Outlet />
+      <div className="flex-1 overflow-hidden">
+        <Outlet />
+      </div>
     </div>
   );
 }

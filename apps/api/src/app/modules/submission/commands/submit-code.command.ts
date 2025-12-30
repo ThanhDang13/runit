@@ -8,7 +8,8 @@ export class SubmitCodeCommand extends Command<SubmitCodeResponseDto> {
     public readonly code: string,
     public readonly language: string,
     public readonly problemId: string,
-    public readonly userId: string
+    public readonly userId: string,
+    public readonly contestId?: string
   ) {
     super();
   }

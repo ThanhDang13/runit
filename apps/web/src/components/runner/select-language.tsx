@@ -3,33 +3,53 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue
 } from "@web/components/ui/select";
-import { Code2 } from "lucide-react";
+import { Badge } from "@web/components/ui/badge";
+import { ExecuteRequest } from "@web/lib/tanstack/options/execute";
 
 interface Props {
   value: string;
-  onChange: (val: string) => void;
+  onChange: (val: ExecuteRequest["language"]) => void;
   disabled?: boolean;
 }
 
-export const SelectLanguage = ({ value, onChange, disabled }: Props) => (
-  <Select value={value} onValueChange={onChange} disabled={disabled}>
-    <SelectTrigger className="w-40">
-      <Code2 className="text-muted-foreground mr-2 h-4 w-4" />
-      <SelectValue placeholder="Language" />
-    </SelectTrigger>
+const LANGUAGES = [
+  { value: "python", label: "Python", icon: "Py", color: "bg-blue-500" },
+  { value: "javascript", label: "JavaScript", icon: "JS", color: "bg-yellow-500" },
+  { value: "java", label: "Java", icon: "Jv", color: "bg-orange-500" },
+  { value: "cpp", label: "C++", icon: "C++", color: "bg-purple-500" }
+] as const;
 
-    <SelectContent>
-      <SelectGroup>
-        <SelectLabel>Languages</SelectLabel>
-        <SelectItem value="cpp">C++</SelectItem>
-        <SelectItem value="python">Python</SelectItem>
-        <SelectItem value="java">Java</SelectItem>
-        <SelectItem value="javascript">JavaScript</SelectItem>
-      </SelectGroup>
-    </SelectContent>
-  </Select>
-);
+export const SelectLanguage = ({ value, onChange, disabled }: Props) => {
+  const selectedLanguage = LANGUAGES.find((lang) => lang.value === value);
+
+  return (
+    <Select value={value} onValueChange={onChange} disabled={disabled}>
+      <SelectTrigger className="h-8 w-35 gap-2 text-xs">
+        {selectedLanguage && (
+          <>
+            {/* <span className="text-base leading-none">{selectedLanguage.icon}</span> */}
+            <span className="font-medium">{selectedLanguage.label}</span>
+          </>
+        )}
+        {!selectedLanguage && <SelectValue placeholder="Select language" />}
+      </SelectTrigger>
+
+      <SelectContent>
+        <SelectGroup>
+          {LANGUAGES.map((lang) => (
+            <SelectItem key={lang.value} value={lang.value} className="cursor-pointer">
+              <div className="flex items-center gap-2">
+                {/* <span className="text-base leading-none">{lang.icon}</span> */}
+                <span className="font-medium">{lang.label}</span>
+                {/* <div className={`ml-auto h-2 w-2 rounded-full ${lang.color}`} /> */}
+              </div>
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+};

@@ -117,12 +117,12 @@ function CreateProblemPage() {
         </Link>
       </div>
 
-      <Card className="border-border shadow-lg">
-        <CardHeader className="border-border-200 border-b">
+      <Card className="border-0 shadow-none">
+        <CardHeader className="border-0">
           <CardTitle className="text-2xl font-semibold">Create Problem</CardTitle>
           <CardDescription>Fill in problem details and testcases below</CardDescription>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="py-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <Tabs className="w-full" defaultValue="details">
@@ -149,25 +149,6 @@ function CreateProblemPage() {
 
                   <FormField
                     control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Editor
-                            editorSerializedState={
-                              field.value ? JSON.parse(field.value) : undefined
-                            }
-                            onSerializedChange={(value) => field.onChange(JSON.stringify(value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="difficulty"
                     render={({ field }) => (
                       <FormItem>
@@ -186,6 +167,23 @@ function CreateProblemPage() {
                             ))}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Editor
+                            editorState={field.value ? JSON.parse(field.value) : undefined}
+                            onChange={(value) => field.onChange(JSON.stringify(value))}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}

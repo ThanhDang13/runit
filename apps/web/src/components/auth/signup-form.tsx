@@ -41,16 +41,15 @@ export function SignupForm({ className, ...props }: React.ComponentProps<"form">
     }
   });
   const navigate = useNavigate();
-  const login = useAuthStore((s) => s.login);
 
   const mutation = useMutation({
     ...createSignupMutationOptions(),
     onSuccess: (data) => {
-      login({ token: data.accessToken });
-
       navigate({ to: "/" });
 
-      toast.success("Signup successful!");
+      toast.success(
+        data.message || "Signup successful! Please check your email to verify your account."
+      );
     },
     onError: (error) => {
       toast.error(error?.message ?? "Signup failed");

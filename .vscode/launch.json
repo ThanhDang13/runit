@@ -4,12 +4,14 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug API (Webpack build)",
-      "program": "${workspaceFolder}/dist/apps/api/main.js",
-      "cwd": "${workspaceFolder}",
-      "sourceMaps": true,
+      "name": "Debug Nest API (Nx)",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["nx", "run", "api:serve", "--watch"],
       "skipFiles": ["<node_internals>/**"],
-      "outFiles": ["${workspaceFolder}/dist/apps/api/**/*.js"]
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "sourceMaps": true,
+      "outFiles": ["${workspaceFolder}/dist/**/*.js"]
     }
   ]
 }

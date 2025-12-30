@@ -8,7 +8,7 @@ import { and, asc, desc, ilike, sql } from "drizzle-orm";
 import { normalizeToIso } from "@api/app/common/helpers/common";
 
 @QueryHandler(GetUsersQuery)
-export class GetUsersHandler implements IQueryHandler<GetUsersQuery, GetUsersResponseDto> {
+export class GetUsersHandler implements IQueryHandler<GetUsersQuery> {
   constructor(@Inject("PG") private readonly db: PGDatabase) {}
 
   async execute(query: GetUsersQuery): Promise<GetUsersResponseDto> {
@@ -49,6 +49,7 @@ export class GetUsersHandler implements IQueryHandler<GetUsersQuery, GetUsersRes
         email: users.email,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
+        active: users.active,
         role: users.role
       })
       .from(users)

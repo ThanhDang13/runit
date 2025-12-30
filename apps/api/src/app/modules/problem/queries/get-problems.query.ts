@@ -11,7 +11,8 @@ export class GetProblemsQuery extends Query<OffsetPaginated<Problem>> {
   constructor(
     public readonly paging: OffsetPagingDTO,
     public readonly keyword?: string,
-    public readonly difficulty?: string
+    public readonly difficulty?: string,
+    public readonly userId?: string
   ) {
     super();
   }

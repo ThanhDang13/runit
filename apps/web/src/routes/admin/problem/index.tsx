@@ -22,9 +22,10 @@ import {
 } from "@web/components/ui/dropdown-menu";
 import { Button } from "@web/components/ui/button";
 import { MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
+import { Badge } from "@web/components/ui/badge";
 
 export const Route = createFileRoute("/admin/problem/")({
-  component: AdminProblem
+  component: AdminProblems
 });
 
 export const columns: ColumnDef<Problem>[] = [
@@ -55,11 +56,35 @@ export const columns: ColumnDef<Problem>[] = [
   },
   {
     accessorKey: "difficulty",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Difficulty" />
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Difficulty" />,
+    cell: ({ row }) => {
+      const difficulty = row.original.difficulty.toLowerCase();
+
+      const difficultyClassMap: Record<string, string> = {
+        easy: "bg-green-100 text-green-800",
+        medium: "bg-yellow-100 text-yellow-800",
+        hard: "bg-red-100 text-red-800"
+      };
+
+      const classes = difficultyClassMap[difficulty] ?? "bg-gray-100 text-gray-800";
+
+      return (
+        <Badge variant="outline" className={classes}>
+          {row.original.difficulty}
+        </Badge>
+      );
+    }
   },
   {
     accessorKey: "createdAt",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />
+    header: ({ column }) => <DataTableColumnHeader column={column} title="End" />,
+    cell: ({ row }) => {
+      const date = new Date(row.original.createdAt);
+      return date.toLocaleString(undefined, {
+        dateStyle: "medium",
+        timeStyle: "short"
+      });
+    }
   },
   {
     id: "actions",
@@ -98,7 +123,7 @@ export const columns: ColumnDef<Problem>[] = [
   }
 ];
 
-function AdminProblem() {
+function AdminProblems() {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -137,17 +162,19 @@ function AdminProblem() {
   });
 
   return (
-    <div className="container mx-auto flex flex-col gap-4 py-8">
-      <div className="flex justify-end">
-        <Link to="/admin/problem/new">
-          <Button className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            New Problem
-          </Button>
-        </Link>
-      </div>
-
-      <DataTable table={table} filterKey="title" />
+    <div className="container mx-auto flex flex-col gap-4 px-4 py-8">
+      <DataTable
+        table={table}
+        filterKey="title"
+        toolbarRight={
+          <Link to="/admin/problem/new">
+            <Button size="sm" variant="outline" className="ml-auto">
+              <Plus className="h-4 w-4" />
+              New Problem
+            </Button>
+          </Link>
+        }
+      />
     </div>
   );
 }

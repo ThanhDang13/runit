@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm";
 import { normalizeToIso } from "@api/app/common/helpers/common";
 
 @QueryHandler(GetUserByIdQuery)
-export class GetUserByIdHandler implements IQueryHandler<GetUserByIdQuery, UserResponseDto> {
+export class GetUserByIdHandler implements IQueryHandler<GetUserByIdQuery> {
   constructor(@Inject("PG") private readonly db: PGDatabase) {}
 
   async execute(query: GetUserByIdQuery): Promise<UserResponseDto> {

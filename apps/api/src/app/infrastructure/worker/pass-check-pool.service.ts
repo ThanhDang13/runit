@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { availableParallelism, FixedThreadPool, PoolEvents } from "poolifier";
 import path from "node:path";
+import fs from "fs";
 import type {
   PassCheckTask,
   PassCheckResult
@@ -12,7 +13,10 @@ export class PassCheckWorkerService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PassCheckWorkerService.name);
 
   onModuleInit() {
-    const workerPath = path.resolve(__dirname, "../api-worker/check-pass.worker.js");
+    const workerPath = path.resolve(__dirname, "./check-pass.worker.js");
+    if (!fs.existsSync(workerPath)) {
+      throw new Error(`Worker not found: ${workerPath}`);
+    }
     this.pool = new FixedThreadPool(availableParallelism(), workerPath, {
       errorHandler: (err) => this.logger.error(err)
     });

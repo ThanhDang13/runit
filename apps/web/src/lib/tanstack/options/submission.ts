@@ -1,10 +1,12 @@
 /* eslint-disable @nx/enforce-module-boundaries */
-import { OffsetPaginated } from "@api/app/common/types/pagination";
-import { Submission } from "@api/app/modules/submission/dtos/common.dtos";
-import type { GetSubmissionsRequestQueryDto } from "@api/app/modules/submission/dtos/get-submissions.dtos";
+import {
+  type GetSubmissionsResponseDto,
+  type GetSubmissionsRequestQueryDto
+} from "@api/app/modules/submission/dtos/get-submissions.dtos";
 import { InfiniteData, UseInfiniteQueryOptions } from "@tanstack/react-query";
 import { axiosInstance } from "@web/lib/axios";
-type GetSubmissionsResponseDto = OffsetPaginated<Submission>;
+import type { Prettify } from "@api/app/common/types/common";
+import type { Submission } from "@api/app/modules/submission/dtos/common.dtos";
 
 async function fetchSubmissions({
   type,
@@ -47,7 +49,7 @@ async function fetchSubmissions({
   return res.data;
 }
 
-export type SubmissionsPage = GetSubmissionsResponseDto;
+export type SubmissionsPage = Prettify<GetSubmissionsResponseDto>;
 
 const DEFAULT_LIMIT = 10;
 
@@ -99,4 +101,4 @@ export const createGetSubmissionsInfiniteQueryOptions = ({
   };
 };
 
-export type { GetSubmissionsRequestQueryDto, GetSubmissionsResponseDto };
+export type { GetSubmissionsRequestQueryDto, GetSubmissionsResponseDto, Submission };

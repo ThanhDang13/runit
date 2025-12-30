@@ -1,20 +1,21 @@
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
-import { and, asc, desc, eq, ilike, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, isNull, sql } from "drizzle-orm";
 import { OffsetPaginated } from "@api/app/common/types/pagination";
 import { PGDatabase } from "@api/app/infrastructure/database/database.service";
 import { Inject } from "@nestjs/common";
 import { GetSubmissionsQuery } from "../get-submissions.query";
 import { Submission, SubmissionSchema } from "@api/app/modules/submission/dtos/common.dtos";
-import { problems, submissions } from "@api/app/infrastructure/database/schema";
+import { contests, problems, submissions, users } from "@api/app/infrastructure/database/schema";
 
 @QueryHandler(GetSubmissionsQuery)
-export class GetSubmissionsHandler
-  implements IQueryHandler<GetSubmissionsQuery, OffsetPaginated<Submission>>
-{
+export class GetSubmissionsHandler implements IQueryHandler<
+  GetSubmissionsQuery,
+  OffsetPaginated<Submission>
+> {
   constructor(@Inject("PG") private readonly db: PGDatabase) {}
 
   async execute(query: GetSubmissionsQuery): Promise<OffsetPaginated<Submission>> {
-    const { paging, userId, problemId, language, status } = query;
+    const { paging, userId, problemId, language, status, contestId, currentUserId } = query;
     const { type, page, limit, sort, order } = paging;
 
     const allowedSort = ["createdAt", "language", "status"];
@@ -42,8 +43,13 @@ export class GetSubmissionsHandler
     if (status) {
       filters.push(eq(submissions.status, status));
     }
+    if (typeof query.contestId === "string" && query.contestId.length > 0) {
+      filters.push(eq(submissions.contestId, query.contestId));
+    } else {
+      filters.push(isNull(submissions.contestId));
+    }
 
-    const whereClause = filters.length ? and(...filters) : undefined;
+    const whereClause = filters.length ? and(...filters) : null;
 
     const [{ count }] = await this.db
       .select({ count: sql<number>`count(*)` })
@@ -52,10 +58,30 @@ export class GetSubmissionsHandler
 
     const offset = (page - 1) * limit;
 
+    const now = new Date();
+
+    let contestRunning;
+    if (contestId) {
+      const contestRow = await this.db
+        .select({ startTime: sql<Date>`start_time`, endTime: sql<Date>`end_time` })
+        .from(contests)
+        .where(eq(sql<string>`id`, contestId))
+        .limit(1)
+        .then((rows) => rows[0]);
+
+      if (contestRow) {
+        const startTime = new Date(contestRow.startTime);
+        const endTime = new Date(contestRow.endTime);
+
+        if (now >= startTime && now <= endTime) {
+          contestRunning = true;
+        }
+      }
+    }
+
     const rows = await this.db
       .select({
         id: submissions.id,
-        userId: submissions.userId,
         language: submissions.language,
         code: submissions.code,
         status: submissions.status,
@@ -65,16 +91,26 @@ export class GetSubmissionsHandler
         problem: {
           id: problems.id,
           title: problems.title
+        },
+        user: {
+          id: users.id,
+          name: users.name
         }
       })
       .from(submissions)
       .leftJoin(problems, eq(problems.id, submissions.problemId))
+      .leftJoin(users, eq(users.id, submissions.userId))
       .where(whereClause)
       .orderBy(orderExpression)
       .limit(limit)
       .offset(offset);
 
-    const results: Submission[] = rows.map((row) => SubmissionSchema.parse(row));
+    const results: Submission[] = rows.map((row) => {
+      if (contestRunning && row.user.id !== query.currentUserId) {
+        return SubmissionSchema.parse({ ...row, code: null });
+      }
+      return SubmissionSchema.parse(row);
+    });
 
     return {
       type,

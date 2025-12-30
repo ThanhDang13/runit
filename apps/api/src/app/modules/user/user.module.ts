@@ -6,16 +6,19 @@ import { UpdateUserHandler } from "@api/app/modules/user/commands/handlers/updat
 import { DeleteUserHandler } from "@api/app/modules/user/commands/handlers/delete-user.handler";
 import { GetUserByIdHandler } from "@api/app/modules/user/queries/handlers/get-user-by-id.handler";
 import { GetUsersHandler } from "@api/app/modules/user/queries/handlers/get-users.handler";
+import { UpdateProfileHandler } from "@api/app/modules/user/commands/handlers/update-profile.handler";
+import { ProfileController } from "@api/app/modules/user/profile.controller";
 
 @Module({
   imports: [CqrsModule],
-  controllers: [UserController],
+  controllers: [UserController, ProfileController],
   providers: [
     CreateUserHandler,
     UpdateUserHandler,
     DeleteUserHandler,
     GetUserByIdHandler,
-    GetUsersHandler
+    GetUsersHandler,
+    UpdateProfileHandler
   ]
 })
 export class UserModule {}

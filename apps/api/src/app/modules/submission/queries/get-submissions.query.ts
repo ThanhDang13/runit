@@ -8,7 +8,9 @@ export class GetSubmissionsQuery extends Query<OffsetPaginated<Submission>> {
     public readonly userId?: string,
     public readonly problemId?: string,
     public readonly language?: string,
-    public readonly status?: string
+    public readonly status?: string,
+    public readonly contestId?: string,
+    public currentUserId?: string
   ) {
     super();
   }

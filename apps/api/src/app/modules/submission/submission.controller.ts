@@ -38,9 +38,10 @@ export class SubmissionController {
       sort: query.sort,
       order: query.order
     };
+    const userId = query.userId;
 
     return this.queryBus.execute(
-      new GetSubmissionsQuery(paging, undefined, query.problemId, query.language, query.status)
+      new GetSubmissionsQuery(paging, userId, query.problemId, query.language, query.status)
     );
   }
 

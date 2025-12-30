@@ -19,16 +19,34 @@ axiosInstance.interceptors.request.use((config) => {
 
 const AUTH_TOAST_ID = "auth";
 
+const AUTH_ENDPOINTS = [
+  "/auth/login",
+  "/auth/signup",
+  "/auth/verify-email",
+  "/auth/resend-verification"
+];
+
+function isAuthEndpoint(url?: string) {
+  if (!url) return false;
+  return AUTH_ENDPOINTS.some((path) => url.includes(path));
+}
+
 axiosInstance.interceptors.response.use(
   (res) => res,
   (err) => {
-    if (err.response?.status === 401) {
+    const status = err.response?.status;
+    const url = err.config?.url;
+    const isLoggedIn = !!useAuthStore.getState().token;
+
+    if (status === 401 && isLoggedIn && !isAuthEndpoint(url)) {
       useAuthStore.getState().clear();
+
       toast("Session expired", {
         id: AUTH_TOAST_ID,
         description: "Please login again"
       });
     }
+
     return Promise.reject(err);
   }
 );

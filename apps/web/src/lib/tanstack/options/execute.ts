@@ -1,25 +1,16 @@
+/* eslint-disable @nx/enforce-module-boundaries */
 import { UseMutationOptions } from "@tanstack/react-query";
 import { axiosInstance } from "@web/lib/axios";
+import type {
+  ExecuteRequestDto,
+  ExecuteResponseDto
+} from "@api/app/modules/execution/dtos/execute.dtos";
+import { Prettify } from "@api/app/common/types/common";
+export type ExecuteRequest = Prettify<ExecuteRequestDto>;
 
-export interface ExecuteRequest {
-  code: string;
-  language: string;
-  problemId: string;
-}
+export type ExecuteResult = ExecuteResponseDto["results"][number];
 
-export interface ExecuteResult {
-  input: string;
-  output: string;
-  passed?: boolean;
-  expected: string;
-}
-
-export interface ExecutionSummary {
-  verdict: string;
-  total: number;
-  totalPassed: number;
-  results: ExecuteResult[];
-}
+export type ExecutionSummary = Prettify<ExecuteResponseDto>;
 
 export async function executeCode(payload: ExecuteRequest): Promise<ExecutionSummary> {
   const res = await axiosInstance.post<ExecutionSummary>("/execute", payload);

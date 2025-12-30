@@ -13,7 +13,7 @@ export class SubmitCodeHandler implements ICommandHandler<SubmitCodeCommand> {
   ) {}
 
   async execute(command: SubmitCodeCommand): Promise<ExecutionSummary> {
-    const { code, language, problemId, userId } = command;
+    const { code, language, problemId, userId, contestId } = command;
 
     const submission = await this.submissionService.createSubmission({
       problemId,
@@ -21,7 +21,8 @@ export class SubmitCodeHandler implements ICommandHandler<SubmitCodeCommand> {
       language,
       code,
       status: "pending",
-      summary: {}
+      summary: {},
+      contestId
     });
 
     const summary: ExecutionSummary = await this.commandBus.execute(

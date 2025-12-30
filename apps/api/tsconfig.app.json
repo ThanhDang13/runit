@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/out-tsc",
+    "outDir": "../../dist",
     "module": "commonjs",
     "types": ["node"],
     "experimentalDecorators": true,
@@ -10,5 +10,6 @@
     "sourceMap": true,
     "inlineSources": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "references": [{ "path": "../../packages/shared/tsconfig.lib.json" }]
 }

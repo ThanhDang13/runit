@@ -9,25 +9,28 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as EditorRouteImport } from './routes/editor'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as URouteImport } from './routes/_u'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as UIndexRouteImport } from './routes/_u/index'
 import { Route as USubmissionsRouteImport } from './routes/_u/submissions'
+import { Route as UProfileRouteImport } from './routes/_u/profile'
 import { Route as UProblemListRouteImport } from './routes/_u/problem-list'
+import { Route as UContestsRouteImport } from './routes/_u/contests'
+import { Route as AuthVerifyEmailRouteImport } from './routes/_auth/verify-email'
 import { Route as AuthSignupRouteImport } from './routes/_auth/signup'
+import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-password'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
+import { Route as AuthForgotPasswordRouteImport } from './routes/_auth/forgot-password'
+import { Route as AdminUserIndexRouteImport } from './routes/admin/user/index'
 import { Route as AdminProblemIndexRouteImport } from './routes/admin/problem/index'
+import { Route as AdminContestIndexRouteImport } from './routes/admin/contest/index'
 import { Route as AdminProblemNewRouteImport } from './routes/admin/problem/new'
 import { Route as AdminProblemIdRouteImport } from './routes/admin/problem/$id'
 import { Route as UProblemIdRouteImport } from './routes/_u/problem.$id'
+import { Route as UContestIdRouteImport } from './routes/_u/contest.$id'
+import { Route as UCContestContestIdProblemProblemIdRouteImport } from './routes/_u/_c.contest.$contestId.problem.$problemId'
 
-const EditorRoute = EditorRouteImport.update({
-  id: '/editor',
-  path: '/editor',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -52,14 +55,34 @@ const USubmissionsRoute = USubmissionsRouteImport.update({
   path: '/submissions',
   getParentRoute: () => URoute,
 } as any)
+const UProfileRoute = UProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => URoute,
+} as any)
 const UProblemListRoute = UProblemListRouteImport.update({
   id: '/problem-list',
   path: '/problem-list',
   getParentRoute: () => URoute,
 } as any)
+const UContestsRoute = UContestsRouteImport.update({
+  id: '/contests',
+  path: '/contests',
+  getParentRoute: () => URoute,
+} as any)
+const AuthVerifyEmailRoute = AuthVerifyEmailRouteImport.update({
+  id: '/_auth/verify-email',
+  path: '/verify-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthSignupRoute = AuthSignupRouteImport.update({
   id: '/_auth/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/_auth/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
@@ -67,9 +90,24 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/_auth/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUserIndexRoute = AdminUserIndexRouteImport.update({
+  id: '/user/',
+  path: '/user/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminProblemIndexRoute = AdminProblemIndexRouteImport.update({
   id: '/problem/',
   path: '/problem/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminContestIndexRoute = AdminContestIndexRouteImport.update({
+  id: '/contest/',
+  path: '/contest/',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminProblemNewRoute = AdminProblemNewRouteImport.update({
@@ -87,112 +125,166 @@ const UProblemIdRoute = UProblemIdRouteImport.update({
   path: '/problem/$id',
   getParentRoute: () => URoute,
 } as any)
+const UContestIdRoute = UContestIdRouteImport.update({
+  id: '/contest/$id',
+  path: '/contest/$id',
+  getParentRoute: () => URoute,
+} as any)
+const UCContestContestIdProblemProblemIdRoute =
+  UCContestContestIdProblemProblemIdRouteImport.update({
+    id: '/_c/contest/$contestId/problem/$problemId',
+    path: '/contest/$contestId/problem/$problemId',
+    getParentRoute: () => URoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
-  '/editor': typeof EditorRoute
+  '/forgot-password': typeof AuthForgotPasswordRoute
   '/login': typeof AuthLoginRoute
+  '/reset-password': typeof AuthResetPasswordRoute
   '/signup': typeof AuthSignupRoute
+  '/verify-email': typeof AuthVerifyEmailRoute
+  '/contests': typeof UContestsRoute
   '/problem-list': typeof UProblemListRoute
+  '/profile': typeof UProfileRoute
   '/submissions': typeof USubmissionsRoute
   '/': typeof UIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/contest/$id': typeof UContestIdRoute
   '/problem/$id': typeof UProblemIdRoute
   '/admin/problem/$id': typeof AdminProblemIdRoute
   '/admin/problem/new': typeof AdminProblemNewRoute
+  '/admin/contest': typeof AdminContestIndexRoute
   '/admin/problem': typeof AdminProblemIndexRoute
+  '/admin/user': typeof AdminUserIndexRoute
+  '/contest/$contestId/problem/$problemId': typeof UCContestContestIdProblemProblemIdRoute
 }
 export interface FileRoutesByTo {
-  '/editor': typeof EditorRoute
+  '/forgot-password': typeof AuthForgotPasswordRoute
   '/login': typeof AuthLoginRoute
+  '/reset-password': typeof AuthResetPasswordRoute
   '/signup': typeof AuthSignupRoute
+  '/verify-email': typeof AuthVerifyEmailRoute
+  '/contests': typeof UContestsRoute
   '/problem-list': typeof UProblemListRoute
+  '/profile': typeof UProfileRoute
   '/submissions': typeof USubmissionsRoute
   '/': typeof UIndexRoute
   '/admin': typeof AdminIndexRoute
+  '/contest/$id': typeof UContestIdRoute
   '/problem/$id': typeof UProblemIdRoute
   '/admin/problem/$id': typeof AdminProblemIdRoute
   '/admin/problem/new': typeof AdminProblemNewRoute
+  '/admin/contest': typeof AdminContestIndexRoute
   '/admin/problem': typeof AdminProblemIndexRoute
+  '/admin/user': typeof AdminUserIndexRoute
+  '/contest/$contestId/problem/$problemId': typeof UCContestContestIdProblemProblemIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_u': typeof URouteWithChildren
   '/admin': typeof AdminRouteWithChildren
-  '/editor': typeof EditorRoute
+  '/_auth/forgot-password': typeof AuthForgotPasswordRoute
   '/_auth/login': typeof AuthLoginRoute
+  '/_auth/reset-password': typeof AuthResetPasswordRoute
   '/_auth/signup': typeof AuthSignupRoute
+  '/_auth/verify-email': typeof AuthVerifyEmailRoute
+  '/_u/contests': typeof UContestsRoute
   '/_u/problem-list': typeof UProblemListRoute
+  '/_u/profile': typeof UProfileRoute
   '/_u/submissions': typeof USubmissionsRoute
   '/_u/': typeof UIndexRoute
   '/admin/': typeof AdminIndexRoute
+  '/_u/contest/$id': typeof UContestIdRoute
   '/_u/problem/$id': typeof UProblemIdRoute
   '/admin/problem/$id': typeof AdminProblemIdRoute
   '/admin/problem/new': typeof AdminProblemNewRoute
+  '/admin/contest/': typeof AdminContestIndexRoute
   '/admin/problem/': typeof AdminProblemIndexRoute
+  '/admin/user/': typeof AdminUserIndexRoute
+  '/_u/_c/contest/$contestId/problem/$problemId': typeof UCContestContestIdProblemProblemIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/admin'
-    | '/editor'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/signup'
+    | '/verify-email'
+    | '/contests'
     | '/problem-list'
+    | '/profile'
     | '/submissions'
     | '/'
     | '/admin/'
+    | '/contest/$id'
     | '/problem/$id'
     | '/admin/problem/$id'
     | '/admin/problem/new'
+    | '/admin/contest'
     | '/admin/problem'
+    | '/admin/user'
+    | '/contest/$contestId/problem/$problemId'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/editor'
+    | '/forgot-password'
     | '/login'
+    | '/reset-password'
     | '/signup'
+    | '/verify-email'
+    | '/contests'
     | '/problem-list'
+    | '/profile'
     | '/submissions'
     | '/'
     | '/admin'
+    | '/contest/$id'
     | '/problem/$id'
     | '/admin/problem/$id'
     | '/admin/problem/new'
+    | '/admin/contest'
     | '/admin/problem'
+    | '/admin/user'
+    | '/contest/$contestId/problem/$problemId'
   id:
     | '__root__'
     | '/_u'
     | '/admin'
-    | '/editor'
+    | '/_auth/forgot-password'
     | '/_auth/login'
+    | '/_auth/reset-password'
     | '/_auth/signup'
+    | '/_auth/verify-email'
+    | '/_u/contests'
     | '/_u/problem-list'
+    | '/_u/profile'
     | '/_u/submissions'
     | '/_u/'
     | '/admin/'
+    | '/_u/contest/$id'
     | '/_u/problem/$id'
     | '/admin/problem/$id'
     | '/admin/problem/new'
+    | '/admin/contest/'
     | '/admin/problem/'
+    | '/admin/user/'
+    | '/_u/_c/contest/$contestId/problem/$problemId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   URoute: typeof URouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
-  EditorRoute: typeof EditorRoute
+  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
   AuthLoginRoute: typeof AuthLoginRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
   AuthSignupRoute: typeof AuthSignupRoute
+  AuthVerifyEmailRoute: typeof AuthVerifyEmailRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/editor': {
-      id: '/editor'
-      path: '/editor'
-      fullPath: '/editor'
-      preLoaderRoute: typeof EditorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -228,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof USubmissionsRouteImport
       parentRoute: typeof URoute
     }
+    '/_u/profile': {
+      id: '/_u/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof UProfileRouteImport
+      parentRoute: typeof URoute
+    }
     '/_u/problem-list': {
       id: '/_u/problem-list'
       path: '/problem-list'
@@ -235,11 +334,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UProblemListRouteImport
       parentRoute: typeof URoute
     }
+    '/_u/contests': {
+      id: '/_u/contests'
+      path: '/contests'
+      fullPath: '/contests'
+      preLoaderRoute: typeof UContestsRouteImport
+      parentRoute: typeof URoute
+    }
+    '/_auth/verify-email': {
+      id: '/_auth/verify-email'
+      path: '/verify-email'
+      fullPath: '/verify-email'
+      preLoaderRoute: typeof AuthVerifyEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_auth/signup': {
       id: '/_auth/signup'
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof AuthSignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_auth/reset-password': {
+      id: '/_auth/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_auth/login': {
@@ -249,11 +369,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_auth/forgot-password': {
+      id: '/_auth/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/user/': {
+      id: '/admin/user/'
+      path: '/user'
+      fullPath: '/admin/user'
+      preLoaderRoute: typeof AdminUserIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/problem/': {
       id: '/admin/problem/'
       path: '/problem'
       fullPath: '/admin/problem'
       preLoaderRoute: typeof AdminProblemIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/contest/': {
+      id: '/admin/contest/'
+      path: '/contest'
+      fullPath: '/admin/contest'
+      preLoaderRoute: typeof AdminContestIndexRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/problem/new': {
@@ -277,21 +418,44 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UProblemIdRouteImport
       parentRoute: typeof URoute
     }
+    '/_u/contest/$id': {
+      id: '/_u/contest/$id'
+      path: '/contest/$id'
+      fullPath: '/contest/$id'
+      preLoaderRoute: typeof UContestIdRouteImport
+      parentRoute: typeof URoute
+    }
+    '/_u/_c/contest/$contestId/problem/$problemId': {
+      id: '/_u/_c/contest/$contestId/problem/$problemId'
+      path: '/contest/$contestId/problem/$problemId'
+      fullPath: '/contest/$contestId/problem/$problemId'
+      preLoaderRoute: typeof UCContestContestIdProblemProblemIdRouteImport
+      parentRoute: typeof URoute
+    }
   }
 }
 
 interface URouteChildren {
+  UContestsRoute: typeof UContestsRoute
   UProblemListRoute: typeof UProblemListRoute
+  UProfileRoute: typeof UProfileRoute
   USubmissionsRoute: typeof USubmissionsRoute
   UIndexRoute: typeof UIndexRoute
+  UContestIdRoute: typeof UContestIdRoute
   UProblemIdRoute: typeof UProblemIdRoute
+  UCContestContestIdProblemProblemIdRoute: typeof UCContestContestIdProblemProblemIdRoute
 }
 
 const URouteChildren: URouteChildren = {
+  UContestsRoute: UContestsRoute,
   UProblemListRoute: UProblemListRoute,
+  UProfileRoute: UProfileRoute,
   USubmissionsRoute: USubmissionsRoute,
   UIndexRoute: UIndexRoute,
+  UContestIdRoute: UContestIdRoute,
   UProblemIdRoute: UProblemIdRoute,
+  UCContestContestIdProblemProblemIdRoute:
+    UCContestContestIdProblemProblemIdRoute,
 }
 
 const URouteWithChildren = URoute._addFileChildren(URouteChildren)
@@ -300,14 +464,18 @@ interface AdminRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
   AdminProblemIdRoute: typeof AdminProblemIdRoute
   AdminProblemNewRoute: typeof AdminProblemNewRoute
+  AdminContestIndexRoute: typeof AdminContestIndexRoute
   AdminProblemIndexRoute: typeof AdminProblemIndexRoute
+  AdminUserIndexRoute: typeof AdminUserIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
   AdminProblemIdRoute: AdminProblemIdRoute,
   AdminProblemNewRoute: AdminProblemNewRoute,
+  AdminContestIndexRoute: AdminContestIndexRoute,
   AdminProblemIndexRoute: AdminProblemIndexRoute,
+  AdminUserIndexRoute: AdminUserIndexRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
@@ -315,9 +483,11 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   URoute: URouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
-  EditorRoute: EditorRoute,
+  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
   AuthLoginRoute: AuthLoginRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
   AuthSignupRoute: AuthSignupRoute,
+  AuthVerifyEmailRoute: AuthVerifyEmailRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

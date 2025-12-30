@@ -7,37 +7,22 @@
       "build": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "webpack-cli build",
-          "args": [
-            "--node-env=production"
-          ]
+          "commands": [
+            "tsc --build apps/api/tsconfig.app.json",
+            "tsc-alias -p apps/api/tsconfig.app.json"
+          ],
+          "parallel": false
         },
-        "configurations": {
-          "development": {
-            "args": [
-              "--node-env=development"
-            ]
-          }
-        }
-      },
-      "build-worker": {
-        "executor": "nx:run-commands",
-        "options": {
-          "command": "webpack --config apps/api/webpack.worker.config.js --mode production"
-        },
-        "configurations": {
-          "development": {
-            "command": "webpack --config apps/api/webpack.worker.config.js --mode development"
-          }
-        }
+        "outputs": [
+          "{workspaceRoot}/dist/apps/api/src"
+        ]
       },
       "serve": {
         "continuous": true,
         "executor": "@nx/js:node",
         "defaultConfiguration": "development",
         "dependsOn": [
-          "build",
-          "build-worker"
+          "build"
         ],
         "options": {
           "buildTarget": "api:build",
@@ -68,8 +53,14 @@
     "@nestjs/swagger": "^11.2.1",
     "@node-rs/argon2": "^2.0.2",
     "axios": "^1.13.2",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.3",
+    "dotenv": "^17.2.3",
     "drizzle-orm": "^0.44.7",
+    "fastify": "5.6.2",
+    "ioredis": "^5.8.2",
     "nestjs-zod": "^5.0.1",
+    "nodemailer": "^7.0.11",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.16.3",
@@ -78,10 +69,14 @@
     "poolifier": "^5.1.6",
     "rxjs": "^7.8.2",
     "tslib": "^2.8.1",
+    "uuid": "^13.0.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@types/nodemailer": "^7.0.4",
     "drizzle-kit": "^0.31.6",
-    "node-loader": "^2.1.0"
+    "node-loader": "^2.1.0",
+    "tsc-alias": "^1.8.16",
+    "typescript": "~5.8.3"
   }
 }

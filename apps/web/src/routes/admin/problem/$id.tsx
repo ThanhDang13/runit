@@ -79,12 +79,12 @@ function RouteComponent() {
       </div>
 
       {/* ---------------- Problem Info & Form ---------------- */}
-      <Card className="border-0 shadow-lg">
-        <CardHeader className="border-border-200 border-b">
+      <Card className="border-0 shadow-none">
+        <CardHeader className="border-border-200 border-0">
           <CardTitle className="text-2xl font-semibold">Edit Problem</CardTitle>
           <CardDescription>Update problem details and testcases below</CardDescription>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="py-6">
           <ProblemForm problem={problem} />
         </CardContent>
       </Card>
@@ -233,10 +233,6 @@ function ProblemForm({ problem }: ProblemFormProps) {
                     <FormItem className="w-full">
                       <FormLabel>Description</FormLabel>
                       <FormControl>
-                        {/* <MarkdownEditor
-                          value={field.value ?? ""}
-                          onChange={(v) => field.onChange(v)}
-                        /> */}
                         <Editor
                           editorSerializedState={field.value ? JSON.parse(field.value) : undefined}
                           onSerializedChange={(value) => field.onChange(JSON.stringify(value))}
