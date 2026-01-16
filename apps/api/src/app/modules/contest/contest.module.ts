@@ -9,6 +9,7 @@ import { CreateContestHandler } from "@api/app/modules/contest/commands/handlers
 import { UpdateContestHandler } from "@api/app/modules/contest/commands/handlers/update-contest.handler";
 import { JoinContestHandler } from "@api/app/modules/contest/commands/handlers/join-contest.handler";
 import { AddProblemToContestHandler } from "@api/app/modules/contest/commands/handlers/add-problem.handler";
+import { DeleteContestHandler } from "./commands/handlers/delete-contest.handler";
 import { RemoveProblemFromContestHandler } from "@api/app/modules/contest/commands/handlers/remove-problem.handler";
 
 @Module({
@@ -22,7 +23,8 @@ import { RemoveProblemFromContestHandler } from "@api/app/modules/contest/comman
     UpdateContestHandler,
     JoinContestHandler,
     AddProblemToContestHandler,
-    RemoveProblemFromContestHandler
+    RemoveProblemFromContestHandler,
+    DeleteContestHandler
   ],
   exports: [ContestService]
 })

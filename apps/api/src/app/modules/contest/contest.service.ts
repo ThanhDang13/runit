@@ -1,5 +1,15 @@
 import { Injectable, Inject } from "@nestjs/common";
-import { eq, InferInsertModel, InferSelectModel, and, desc, sql, asc } from "drizzle-orm";
+import {
+  eq,
+  InferInsertModel,
+  InferSelectModel,
+  and,
+  desc,
+  sql,
+  asc,
+  ilike,
+  or
+} from "drizzle-orm";
 import { PGDatabase } from "@api/app/infrastructure/database/database.service";
 import {
   contests,
@@ -49,7 +59,8 @@ export class ContestService {
     page: number,
     limit: number,
     sort: string,
-    order: "asc" | "desc"
+    order: "asc" | "desc",
+    keyword?: string
   ): Promise<OffsetPaginated<Contest>> {
     const allowedSort = ["createdAt", "startTime", "endTime", "title"];
 
@@ -64,16 +75,22 @@ export class ContestService {
 
     const orderExpression = order === "asc" ? asc(safeSort) : desc(safeSort);
 
-    const [{ count }] = await this.db.select({ count: sql<number>`count(*)` }).from(contests);
-
     const offset = (page - 1) * limit;
+
+    const whereCondition = keyword ? ilike(contests.title, `%${keyword}%`) : undefined;
+
+    const [{ count }] = await this.db
+      .select({ count: sql<number>`count(*)` })
+      .from(contests)
+      .where(whereCondition);
 
     const rows = await this.db
       .select()
       .from(contests)
       .orderBy(orderExpression)
       .limit(limit)
-      .offset(offset);
+      .offset(offset)
+      .where(whereCondition);
 
     return {
       type: "offset",
@@ -140,8 +157,12 @@ export class ContestService {
   async getContest(contestId: string, userId?: string) {
     const [contest] = await this.db.select().from(contests).where(eq(contests.id, contestId));
 
-    const problemsOfThis = await this.getContestProblemsWithStatus(contestId, userId);
+    const now = new Date();
+    const isUpcoming = new Date(contest.startTime) > now;
 
+    const problemsOfThis = isUpcoming
+      ? []
+      : await this.getContestProblemsWithStatus(contestId, userId);
     const participants = await this.db
       .select({
         id: contestParticipants.id,
@@ -234,5 +255,9 @@ export class ContestService {
       .where(eq(contestProblems.contestId, contestId))
       .groupBy(contestProblems.id, problems.title)
       .orderBy(contestProblems.order);
+  }
+
+  async deleteContest(contestId: string): Promise<void> {
+    await this.db.delete(contests).where(eq(contests.id, contestId));
   }
 }

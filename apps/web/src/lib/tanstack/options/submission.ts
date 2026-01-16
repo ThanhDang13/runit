@@ -1,12 +1,11 @@
-/* eslint-disable @nx/enforce-module-boundaries */
 import {
   type GetSubmissionsResponseDto,
   type GetSubmissionsRequestQueryDto
 } from "@api/app/modules/submission/dtos/get-submissions.dtos";
-import { InfiniteData, UseInfiniteQueryOptions } from "@tanstack/react-query";
+import { InfiniteData, UseInfiniteQueryOptions, UseMutationOptions } from "@tanstack/react-query";
 import { axiosInstance } from "@web/lib/axios";
 import type { Prettify } from "@api/app/common/types/common";
-import type { Submission } from "@api/app/modules/submission/dtos/common.dtos";
+import type { SubmissionStatus, Submission } from "@api/app/modules/submission/dtos/common.dtos";
 
 async function fetchSubmissions({
   type,
@@ -70,7 +69,7 @@ export const createGetSubmissionsInfiniteQueryOptions = ({
   number | undefined
 > => {
   return {
-    queryKey: ["submissions", { limit, sort, order, userId, problemId, language, status }],
+    queryKey: ["submissions", { limit, sort, order, page, userId, problemId, language, status }],
 
     queryFn: ({ pageParam = 1 }) => {
       const paging = pageParam
@@ -97,8 +96,26 @@ export const createGetSubmissionsInfiniteQueryOptions = ({
       return nextPage <= totalPages ? nextPage : undefined;
     },
 
-    initialPageParam: 1
+    initialPageParam: page ?? 1
   };
 };
 
-export type { GetSubmissionsRequestQueryDto, GetSubmissionsResponseDto, Submission };
+export async function deleteSubmission({ id }: { id: string }) {
+  const res = await axiosInstance.delete<{ id: string }>(`/submissions/${id}`);
+  return res.data;
+}
+
+export const createDeleteSubmissionMutationOptions = (): UseMutationOptions<
+  { id: string },
+  Error,
+  { id: string }
+> => ({
+  mutationFn: (data) => deleteSubmission(data)
+});
+
+export type {
+  GetSubmissionsRequestQueryDto,
+  GetSubmissionsResponseDto,
+  Submission,
+  SubmissionStatus
+};

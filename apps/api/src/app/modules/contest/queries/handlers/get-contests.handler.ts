@@ -9,6 +9,6 @@ export class GetContestsHandler implements IQueryHandler<GetContestsQuery> {
 
   async execute(query: GetContestsQuery): Promise<OffsetPaginated<Contest>> {
     const { page, limit, sort, order } = query.paging;
-    return this.contestService.getContests(page, limit, sort, order);
+    return this.contestService.getContests(page, limit, sort, order, query.keyword);
   }
 }

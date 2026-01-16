@@ -51,6 +51,7 @@ import {
 import { AddProblemToContestCommand } from "@api/app/modules/contest/commands/add-problem.command";
 import { RemoveProblemFromContestCommand } from "@api/app/modules/contest/commands/remove-problem.command";
 import { OptionalJwtAuthGuard } from "@api/app/modules/auth/strategy/optional.guard";
+import { DeleteContestCommand } from "@api/app/modules/contest/commands/delete-contest.command";
 
 @Controller("v1/contests")
 export class ContestController {
@@ -70,7 +71,7 @@ export class ContestController {
       order: query.order
     };
 
-    return this.queryBus.execute(new GetContestsQuery(paging));
+    return this.queryBus.execute(new GetContestsQuery(paging, query.keyword));
   }
 
   @Post()
@@ -159,5 +160,12 @@ export class ContestController {
   @ZodResponse({ type: RemoveProblemFromContestResponseDto })
   async removeProblem(@Param("id") contestId: string, @Param("problemId") problemId: string) {
     return this.commandBus.execute(new RemoveProblemFromContestCommand(contestId, problemId));
+  }
+
+  @Delete("/:id")
+  @IsAdmin()
+  async deleteContest(@Param("id") contestId: string) {
+    // Assuming DeleteContestCommand exists and takes the contest ID as an argument
+    return this.commandBus.execute(new DeleteContestCommand(contestId));
   }
 }

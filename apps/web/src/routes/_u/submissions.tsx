@@ -411,11 +411,19 @@ function SubmissionsPage() {
 
                                 <Separator orientation="vertical" className="h-4" />
 
-                                {submission.user?.name && (
+                                {submission.user?.name ? (
                                   <>
                                     <div className="text-muted-foreground flex items-center gap-1 text-xs">
                                       <User className="h-3 w-3" />
                                       {submission.user.name}
+                                    </div>
+                                    <Separator orientation="vertical" className="h-4" />
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="text-muted-foreground flex items-center gap-1 text-xs">
+                                      <User className="h-3 w-3" />
+                                      Unknown User
                                     </div>
                                     <Separator orientation="vertical" className="h-4" />
                                   </>

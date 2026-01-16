@@ -26,6 +26,7 @@ import {
 } from "@web/lib/tanstack/options/execute";
 import { ScrollProgress } from "@web/components/ui/scroll-progress";
 import TourProvider, { TourStep, TourTrigger } from "@web/components/guided-tour";
+import { createMeQueryOptions } from "@web/lib/tanstack/options/auth";
 
 export const Route = createFileRoute("/_u/problem/$id")({ component: CodeRunner });
 
@@ -35,6 +36,7 @@ export function CodeRunner() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { data: problem, isLoading, error } = useQuery(createGetProblemByIdQueryOptions({ id }));
+  const { data: me } = useQuery({ ...createMeQueryOptions() });
 
   const [code, setCode] = useState("// Write your solution here");
   const [language, setLanguage] = useState<ExecuteRequest["language"]>("python");
@@ -215,7 +217,7 @@ export function CodeRunner() {
                     <Button
                       size="sm"
                       onClick={handleSubmit}
-                      disabled={submitMutation.isPending || runMutation.isPending}
+                      disabled={submitMutation.isPending || runMutation.isPending || !me}
                       className="h-8 gap-1.5 px-3"
                     >
                       {submitMutation.isPending ? (

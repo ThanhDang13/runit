@@ -6,7 +6,7 @@ import {
   CollapsibleContent
 } from "@web/components/ui/collapsible";
 import { ChevronDown, FileCode, Sparkles } from "lucide-react";
-import { cn } from "@web/lib/utils";
+import { cn, normalizeMultiline } from "@web/lib/utils";
 
 import { ProblemWithTestcases } from "@web/lib/tanstack/options/problem";
 
@@ -76,8 +76,8 @@ function TestcaseItem({ tc, index }: { tc: Testcase; index: number }) {
 
         <CollapsibleContent>
           <div className="space-y-3 border-t p-3">
-            <Block label="Input" value={tc.input} />
-            <Block label="Expected Output" value={tc.expectedOutput} />
+            <Block label="Input" value={normalizeMultiline(tc.input)} />
+            <Block label="Expected Output" value={normalizeMultiline(tc.expectedOutput)} />
           </div>
         </CollapsibleContent>
       </Card>
@@ -86,8 +86,11 @@ function TestcaseItem({ tc, index }: { tc: Testcase; index: number }) {
 }
 
 function Block({ label, value }: { label: string; value: string }) {
-  const display = value.trim() === "" ? "<empty>" : value;
-  const isEmpty = value.trim() === "";
+  const trimmed = value.trim();
+  const isEmpty = trimmed.length === 0;
+  const display = isEmpty ? "<empty>" : value;
+  console.log("RAW:", value);
+  console.log("JSON:", JSON.stringify(value));
 
   return (
     <div className="space-y-1.5">
@@ -99,8 +102,9 @@ function Block({ label, value }: { label: string; value: string }) {
           </Badge>
         )}
       </div>
-      <div className="bg-muted/50 rounded-md border px-3 py-2">
-        <pre className="font-mono text-xs leading-relaxed">
+
+      <div className="bg-muted/50 overflow-auto rounded-md border px-3 py-2">
+        <pre className="font-mono text-xs leading-relaxed wrap-break-word whitespace-pre-wrap">
           <code className={cn(isEmpty && "text-muted-foreground italic")}>{display}</code>
         </pre>
       </div>

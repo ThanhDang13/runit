@@ -1,6 +1,8 @@
 import { OffsetPaginated } from "@api/app/common/types/pagination";
 import { JwtAuthGuard } from "@api/app/modules/auth/strategy/jwt.guard";
+import { IsAdmin } from "@api/app/modules/auth/strategy/role.guard";
 import { IsUser, ROLES, Roles } from "@api/app/modules/auth/strategy/role.guard";
+import { DeleteSubmissionCommand } from "@api/app/modules/submission/commands/delete-submission.command";
 import { SubmitCodeCommand } from "@api/app/modules/submission/commands/submit-code.command";
 import { Submission } from "@api/app/modules/submission/dtos/common.dtos";
 import {
@@ -12,7 +14,7 @@ import {
   SubmitCodeResponseDto
 } from "@api/app/modules/submission/dtos/submit-code.dtos";
 import { GetSubmissionsQuery } from "@api/app/modules/submission/queries/get-submissions.query";
-import { Body, Controller, Get, Post, Query, Req } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, Query, Req } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { FastifyRequest } from "fastify";
 import { ZodResponse } from "nestjs-zod";
@@ -56,5 +58,12 @@ export class SubmissionController {
       new SubmitCodeCommand(body.code, body.language, body.problemId, req.user.id)
     );
     return summary;
+  }
+
+  @Delete("/:id")
+  @IsAdmin()
+  async deleteSubmission(@Param("id") submissionId: string) {
+    // Assuming DeleteSubmissionCommand exists and takes the submission ID as an argument
+    return this.commandBus.execute(new DeleteSubmissionCommand(submissionId));
   }
 }

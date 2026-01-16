@@ -43,6 +43,9 @@ export class GetSubmissionsHandler implements IQueryHandler<
     if (status) {
       filters.push(eq(submissions.status, status));
     }
+    // if (currentUserId) {
+    //   filters.push(eq(submissions.userId, currentUserId));
+    // }
     if (typeof query.contestId === "string" && query.contestId.length > 0) {
       filters.push(eq(submissions.contestId, query.contestId));
     } else {
@@ -106,7 +109,7 @@ export class GetSubmissionsHandler implements IQueryHandler<
       .offset(offset);
 
     const results: Submission[] = rows.map((row) => {
-      if (contestRunning && row.user.id !== query.currentUserId) {
+      if (contestRunning && row.user?.id !== query.currentUserId) {
         return SubmissionSchema.parse({ ...row, code: null });
       }
       return SubmissionSchema.parse(row);

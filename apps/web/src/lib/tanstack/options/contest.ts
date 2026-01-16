@@ -18,7 +18,10 @@ import type {
   AddProblemToContestResponseDto,
   RemoveProblemFromContestResponseDto
 } from "@api/app/modules/contest/dtos/contest-problem.dtos";
-import type {} from "@api/app/modules/contest/dtos/update-contest.dtos";
+import type {
+  UpdateContestRequestDto,
+  UpdateContestResponseDto
+} from "@api/app/modules/contest/dtos/update-contest.dtos";
 
 import {
   InfiniteData,
@@ -40,6 +43,7 @@ async function fetchContests(query: GetContestsRequestQueryDto): Promise<GetCont
   });
 
   if (query.sort) params.append("sort", query.sort);
+  if (query.keyword) params.append("keyword", query.keyword);
 
   const res = await axiosInstance.get<GetContestsResponseDto>(`/contests?${params.toString()}`);
   return res.data;
@@ -49,25 +53,33 @@ export const createGetContestsInfiniteQueryOptions = ({
   limit,
   sort,
   order,
-  page
-}: Omit<GetContestsRequestQueryDto, "keyword" | "type">): UseInfiniteQueryOptions<
+  page,
+  keyword
+}: Omit<GetContestsRequestQueryDto, "type">): UseInfiniteQueryOptions<
   GetContestsResponseDto,
   Error,
   InfiniteData<GetContestsResponseDto>,
   unknown[],
   number | undefined
 > => ({
-  queryKey: ["contests", { limit }, { sort, order }],
+  queryKey: ["contests", { limit }, { sort, order, page }, keyword],
   queryFn: ({ pageParam = 1 }) => {
     const paging = { page: pageParam, limit: limit ?? DEFAULT_LIMIT };
-    return fetchContests({ type: "offset", page: paging.page, limit: paging.limit, sort, order });
+    return fetchContests({
+      type: "offset",
+      page: paging.page,
+      limit: paging.limit,
+      sort,
+      order,
+      keyword
+    });
   },
   getNextPageParam: (lastPage) => {
     const totalPages = Math.ceil(lastPage.total / (limit ?? DEFAULT_LIMIT));
     const nextPage = lastPage.paging.page + 1;
     return nextPage <= totalPages ? nextPage : undefined;
   },
-  initialPageParam: 1
+  initialPageParam: page ?? 1
 });
 
 async function fetchContestById(id: string): Promise<GetContestResponseDto> {
@@ -158,6 +170,19 @@ export const createSubmitCodeMutationOptions = (
   mutationFn: (data) => submitCode(contestId, data)
 });
 
+async function updateContestById({ id }: { id: string }, body: UpdateContestRequestDto) {
+  const res = await axiosInstance.patch<UpdateContestResponseDto>(`/contests/${id}`, body);
+  return res.data;
+}
+
+export const createUpdateContestMutationOptions = ({
+  id
+}: {
+  id: string;
+}): UseMutationOptions<UpdateContestResponseDto, Error, UpdateContestRequestDto> => ({
+  mutationFn: (data) => updateContestById({ id }, data)
+});
+
 export async function addProblemToContest(
   contestId: string,
   body: AddProblemToContestRequestDto
@@ -186,10 +211,9 @@ export async function removeProblemFromContest(
 }
 
 export const createRemoveProblemFromContestMutationOptions = (
-  contestId: string,
-  problemId: string
-): UseMutationOptions<RemoveProblemFromContestResponseDto, Error, void> => ({
-  mutationFn: () => removeProblemFromContest(contestId, problemId)
+  contestId: string
+): UseMutationOptions<RemoveProblemFromContestResponseDto, Error, string> => ({
+  mutationFn: (problemId: string) => removeProblemFromContest(contestId, problemId)
 });
 
 export async function createContest(
@@ -207,6 +231,19 @@ export const createCreateContestMutationOptions = (): UseMutationOptions<
   mutationFn: (data) => createContest(data)
 });
 
+export async function deleteContest({ id }: { id: string }) {
+  const res = await axiosInstance.delete<{ id: string }>(`/contests/${id}`);
+  return res.data;
+}
+
+export const createDeleteContestMutationOptions = (): UseMutationOptions<
+  { id: string },
+  Error,
+  { id: string }
+> => ({
+  mutationFn: (data) => deleteContest(data)
+});
+
 export type {
   ContestDetails,
   GetContestsRequestQueryDto,
@@ -215,6 +252,8 @@ export type {
   GetContestSubmissionsRequestQueryDto,
   GetContestSubmissionsResponseDto,
   JoinContestResponseDto,
+  UpdateContestRequestDto,
+  UpdateContestResponseDto,
   AddProblemToContestRequestDto,
   AddProblemToContestResponseDto,
   RemoveProblemFromContestResponseDto,

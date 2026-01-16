@@ -12,8 +12,8 @@ export const ContestProblemSchema = z.object({
 export const ContestParticipantSchema = z.object({
   id: z.string(),
   contestId: z.string(),
-  userId: z.string(),
-  name: z.string(),
+  userId: z.string().nullish(),
+  name: z.string().nullish(),
   joinedAt: z.string(),
   solved: z.coerce.number().default(0),
   penalty: z.coerce.number().default(0)

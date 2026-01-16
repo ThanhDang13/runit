@@ -3,7 +3,11 @@ import { ContestSchema } from "@api/app/modules/contest/dtos/common";
 import { createZodDto } from "nestjs-zod";
 import z from "zod";
 
-export const GetContestsRequestQuerySchema = OffsetPagingDTOSchema;
+export const GetContestsRequestQuerySchema = OffsetPagingDTOSchema.extend(
+  z.object({
+    keyword: z.string().optional()
+  }).shape
+);
 
 export class GetContestsRequestQueryDto extends createZodDto(GetContestsRequestQuerySchema) {}
 

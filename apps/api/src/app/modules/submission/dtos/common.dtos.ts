@@ -10,16 +10,20 @@ export const SUBMISSION_STATUSES = [
   "compilation_error"
 ] as const;
 
+export type SubmissionStatus = (typeof SUBMISSION_STATUSES)[number];
+
 export const SubmissionSchema = z.object({
   id: z.uuid(),
   problem: z.object({
     id: z.uuid(),
     title: z.string()
   }),
-  user: z.object({
-    id: z.uuid(),
-    name: z.string()
-  }),
+  user: z
+    .object({
+      id: z.uuid(),
+      name: z.string()
+    })
+    .nullish(),
   language: z.string(),
   code: z.string().nullish(),
   status: z.literal(SUBMISSION_STATUSES),

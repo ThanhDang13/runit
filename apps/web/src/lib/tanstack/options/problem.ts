@@ -1,4 +1,3 @@
-/* eslint-disable @nx/enforce-module-boundaries */
 import { Problem, ProblemWithTestcases } from "@api/app/modules/problem/dtos/common";
 import type {
   GetProblemsRequestQueryDto,
@@ -72,7 +71,7 @@ export const createGetProblemsInfiniteQueryOptions = ({
   number | undefined
 > => {
   return {
-    queryKey: ["problems", { limit }, { sort, order }, keyword],
+    queryKey: ["problems", { limit }, { sort, order, page }, keyword],
 
     queryFn: ({ pageParam = 1 }) => {
       const paging = pageParam
@@ -96,7 +95,7 @@ export const createGetProblemsInfiniteQueryOptions = ({
       return nextPage <= totalPages ? nextPage : undefined;
     },
 
-    initialPageParam: 1
+    initialPageParam: page ?? 1
   };
 };
 
@@ -145,6 +144,19 @@ export const createCreateProblemMutationOptions = (): UseMutationOptions<
   CreateProblemRequestBodyDto
 > => ({
   mutationFn: (data) => createProblem(data)
+});
+
+export async function deleteProblem({ id }: { id: string }) {
+  const res = await axiosInstance.delete<{ id: string }>(`/problems/${id}`);
+  return res.data;
+}
+
+export const createDeleteProblemMutationOptions = (): UseMutationOptions<
+  { id: string },
+  Error,
+  { id: string }
+> => ({
+  mutationFn: (data) => deleteProblem(data)
 });
 
 export type {

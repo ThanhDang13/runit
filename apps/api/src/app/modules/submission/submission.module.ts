@@ -6,11 +6,12 @@ import { SubmissionController } from "./submission.controller";
 import { ExecutionModule } from "@api/app/modules/execution/execution.module";
 import { JwtStrategy } from "@api/app/modules/auth/strategy/jwt.strategy";
 
-import { GetSubmissionsHandler } from "./queries/handlers/get-submissions.handler";
+import { DeleteSubmissionHandler } from "./commands/handlers/delete-submission.handler";
+import { GetSubmissionsHandler } from "@api/app/modules/submission/queries/handlers/get-submissions.handler";
 
 @Module({
   imports: [CqrsModule, ExecutionModule],
-  providers: [SubmissionService, SubmitCodeHandler, GetSubmissionsHandler],
+  providers: [SubmissionService, SubmitCodeHandler, GetSubmissionsHandler, DeleteSubmissionHandler],
   controllers: [SubmissionController],
   exports: [SubmissionService]
 })

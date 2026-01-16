@@ -14,6 +14,7 @@ import { SheetHeader, SheetTitle } from "@web/components/ui/sheet";
 import { Submission } from "@web/lib/tanstack/options/submission";
 
 import { AlertCircle, CheckCheck, FileCode } from "lucide-react";
+import { normalizeMultiline } from "@web/lib/utils";
 
 export function SubmissionSummarySheet({
   submission,
@@ -275,7 +276,7 @@ export function SubmissionSummarySheet({
                         </div>
                         <ScrollArea>
                           <pre className="border-border/40 bg-muted/50 overflow-x-auto rounded-md border p-3 font-mono text-xs leading-relaxed">
-                            {result.input}
+                            {normalizeMultiline(result.input)}
                           </pre>
                           <ScrollBar orientation="horizontal" />
                         </ScrollArea>
@@ -288,7 +289,7 @@ export function SubmissionSummarySheet({
                           </div>
                           <ScrollArea>
                             <pre className="border-border/40 bg-muted/50 overflow-x-auto rounded-md border p-3 font-mono text-xs leading-relaxed">
-                              {result.expected}
+                              {normalizeMultiline(result.expected)}
                             </pre>
                             <ScrollBar orientation="horizontal" />
                           </ScrollArea>
@@ -310,7 +311,7 @@ export function SubmissionSummarySheet({
                                   : "rgb(239 68 68 / 0.1)"
                               }}
                             >
-                              {result.output}
+                              {normalizeMultiline(result.output)}
                             </pre>
                             <ScrollBar orientation="horizontal" />
                           </ScrollArea>

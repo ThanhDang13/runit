@@ -76,7 +76,9 @@ export const testcases = pgTable("testcases", {
     .primaryKey()
     .default(sql`gen_random_uuid()`)
     .notNull(),
-  problemId: text("problem_id").notNull(),
+  problemId: text("problem_id")
+    .notNull()
+    .references(() => problems.id, { onDelete: "cascade" }),
   input: text("input").notNull(),
   expectedOutput: text("expected_output").notNull(),
   isSample: boolean("is_sample").default(false).notNull(),
@@ -88,9 +90,13 @@ export const submissions = pgTable("submissions", {
     .primaryKey()
     .default(sql`gen_random_uuid()`)
     .notNull(),
-  problemId: text("problem_id").notNull(),
-  contestId: text("contest_id"),
-  userId: text("user_id").notNull(),
+  problemId: text("problem_id")
+    .notNull()
+    .references(() => problems.id, { onDelete: "cascade" }),
+  contestId: text("contest_id").references(() => contests.id, { onDelete: "set null" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   language: varchar("language", { length: 50 }).notNull(),
   code: text("code").notNull(),
   status: varchar("status", { length: 50 }).notNull(),
@@ -117,8 +123,12 @@ export const contestProblems = pgTable("contest_problems", {
     .primaryKey()
     .default(sql`gen_random_uuid()`)
     .notNull(),
-  contestId: text("contest_id").notNull(),
-  problemId: text("problem_id").notNull(),
+  contestId: text("contest_id")
+    .notNull()
+    .references(() => contests.id, { onDelete: "cascade" }),
+  problemId: text("problem_id")
+    .notNull()
+    .references(() => problems.id, { onDelete: "cascade" }),
   order: integer("order").default(0).notNull(),
   ...timestamp
 });
@@ -128,13 +138,19 @@ export const contestParticipants = pgTable("contest_participants", {
     .primaryKey()
     .default(sql`gen_random_uuid()`)
     .notNull(),
-  contestId: text("contest_id").notNull(),
-  userId: text("user_id").notNull(),
+  contestId: text("contest_id")
+    .notNull()
+    .references(() => contests.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   joinedAt: ISO8601Timestamp("joined_at", { withTimezone: true })
     .default(sql`now()`)
     .notNull(),
   ...timestamp
 });
+
+//TODO: Implement problems tagging feature
 
 // ------------------- TAGS -------------------
 export const tags = pgTable(
@@ -154,8 +170,12 @@ export const tags = pgTable(
 export const problemTags = pgTable(
   "problem_tags",
   {
-    problemId: text("problem_id").notNull(),
-    tagId: text("tag_id").notNull(),
+    problemId: text("problem_id")
+      .notNull()
+      .references(() => problems.id, { onDelete: "cascade" }),
+    tagId: text("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade" }),
     createdAt: ISO8601Timestamp({ withTimezone: true })
       .default(sql`now()`)
       .notNull()

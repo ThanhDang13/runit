@@ -7,7 +7,7 @@ import {
 } from "@web/components/ui/collapsible";
 import { ChevronDown, CheckCircle2, XCircle, Clock, AlertCircle } from "lucide-react";
 import { ExecuteResult, ExecutionSummary } from "@web/lib/tanstack/options/execute";
-import { cn } from "@web/lib/utils";
+import { cn, normalizeMultiline } from "@web/lib/utils";
 
 interface Props {
   result?: ExecutionSummary;
@@ -138,9 +138,9 @@ const ResultItem = ({ res, idx }: { res: ExecuteResult; idx: number }) => {
 
         <CollapsibleContent>
           <CardContent className="space-y-3 border-t p-3 pt-3">
-            <CodeBlock label="Input" code={res.input} />
-            <CodeBlock label="Expected" code={res.expected} />
-            <CodeBlock label="Output" code={res.output} error={!isPassed} />
+            <CodeBlock label="Input" code={normalizeMultiline(res.input)} />
+            <CodeBlock label="Expected" code={normalizeMultiline(res.expected)} />
+            <CodeBlock label="Output" code={normalizeMultiline(res.output)} error={!isPassed} />
           </CardContent>
         </CollapsibleContent>
       </Card>

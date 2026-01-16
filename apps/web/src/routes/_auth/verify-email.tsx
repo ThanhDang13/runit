@@ -30,12 +30,40 @@ export default function VerifyEmailPage() {
   const urlEmail = search.email;
   const hasVerifiedRef = useRef(false);
 
-  const [message, setMessage] = useState("Verifying your email...");
+  // Form State
   const [resendEmail, setResendEmail] = useState(urlEmail || "");
   const [emailError, setEmailError] = useState("");
 
+  // Mutations
   const verifyEmailMutation = useMutation(createVerifyEmailMutationOptions());
   const resendVerificationMutation = useMutation(createResendVerificationMutationOptions());
+
+  // Derived UI States
+  const isVerifying = verifyEmailMutation.isPending;
+  const isResending = resendVerificationMutation.isPending;
+  const isSuccess = verifyEmailMutation.isSuccess || resendVerificationMutation.isSuccess;
+
+  // A token is invalid if it's missing or if the verification request explicitly failed
+  const hasError = !token || verifyEmailMutation.isError || resendVerificationMutation.isError;
+
+  // Derive the display message based on mutation states
+  const statusMessage = (() => {
+    if (isVerifying) return "Verifying your email address...";
+    if (isResending) return "Sending a new verification link...";
+    if (verifyEmailMutation.isSuccess)
+      return verifyEmailMutation.data?.message || "Your email has been successfully verified!";
+    if (resendVerificationMutation.isSuccess)
+      return (
+        resendVerificationMutation.data?.message ||
+        "Verification email sent! Please check your inbox."
+      );
+    if (!token) return "Invalid or missing verification link. Please request a new one.";
+    if (verifyEmailMutation.isError)
+      return "Verification failed. The link may have expired or is already used.";
+    if (resendVerificationMutation.isError)
+      return "Failed to resend verification email. Please try again later.";
+    return "Ready to verify";
+  })();
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -53,50 +81,19 @@ export default function VerifyEmailPage() {
 
   const handleResend = () => {
     if (!validateEmail(resendEmail)) return;
-
-    resendVerificationMutation.mutate(
-      { email: resendEmail },
-      {
-        onSuccess: (data) => {
-          setMessage(data.message || "Verification email sent! Please check your inbox.");
-        },
-        onError: (err) => {
-          setMessage("Failed to resend verification email.");
-        }
-      }
-    );
+    resendVerificationMutation.mutate({ email: resendEmail });
   };
 
   useEffect(() => {
-    if (!token) {
-      setMessage("Invalid verification link. Please request a new verification email.");
-      return;
-    }
+    if (!token || hasVerifiedRef.current) return;
 
-    if (hasVerifiedRef.current) return;
     hasVerifiedRef.current = true;
-
-    verifyEmailMutation.mutate(
-      { token },
-      {
-        onSuccess: (data) => {
-          setMessage(data.message || "Your email has been successfully verified!");
-        },
-        onError: (err) => {
-          setMessage("Verification failed. The link may have expired.");
-        }
-      }
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
-  const hasInvalidToken = !token;
-  const isError =
-    verifyEmailMutation.isError || resendVerificationMutation.isError || hasInvalidToken;
+    verifyEmailMutation.mutate({ token });
+  }, [token, verifyEmailMutation]);
 
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
-      {/* Left side - Branding/Info (optional) */}
+      {/* Left side - Branding/Info */}
       <div className="bg-muted hidden flex-col gap-4 p-10 lg:flex">
         <div className="flex flex-1 items-center justify-center">
           <div className="max-w-md space-y-6 text-center">
@@ -112,145 +109,109 @@ export default function VerifyEmailPage() {
         </div>
       </div>
 
-      {/* Right side - Verification Form */}
+      {/* Right side - Verification Content */}
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex flex-1 items-center justify-center">
           <Card className="w-full max-w-md">
             <CardHeader className="text-center">
               <div className="bg-muted mx-auto mb-4 flex size-16 items-center justify-center rounded-full">
-                {verifyEmailMutation.isPending && (
-                  <Loader2 className="text-primary size-8 animate-spin" />
-                )}
+                {isVerifying && <Loader2 className="text-primary size-8 animate-spin" />}
 
-                {(verifyEmailMutation.isSuccess || resendVerificationMutation.isSuccess) && (
-                  <CheckCircle2 className="size-8 text-green-600" />
-                )}
+                {isSuccess && !isVerifying && <CheckCircle2 className="size-8 text-green-600" />}
 
-                {isError &&
-                  !verifyEmailMutation.isPending &&
-                  !verifyEmailMutation.isSuccess &&
-                  !resendVerificationMutation.isSuccess && (
-                    <XCircle className="text-destructive size-8" />
-                  )}
+                {hasError && !isVerifying && !isSuccess && (
+                  <XCircle className="text-destructive size-8" />
+                )}
               </div>
 
               <CardTitle className="text-2xl">
-                {verifyEmailMutation.isPending && "Verifying Email"}
+                {isVerifying && "Verifying Email"}
                 {verifyEmailMutation.isSuccess && "Email Verified!"}
-                {resendVerificationMutation.isSuccess && "Verification Email Sent!"}
-                {isError &&
-                  !verifyEmailMutation.isPending &&
-                  !verifyEmailMutation.isSuccess &&
-                  !resendVerificationMutation.isSuccess &&
-                  "Verification Failed"}
+                {resendVerificationMutation.isSuccess && "Verification Sent"}
+                {hasError && !isVerifying && !isSuccess && "Verification Failed"}
               </CardTitle>
 
               <CardDescription>
-                {verifyEmailMutation.isPending && "Please wait while we verify your email address"}
-                {verifyEmailMutation.isSuccess && "Your email has been successfully verified"}
-                {resendVerificationMutation.isSuccess &&
-                  "Check your inbox for the verification link"}
-                {isError &&
-                  !verifyEmailMutation.isPending &&
-                  !verifyEmailMutation.isSuccess &&
-                  !resendVerificationMutation.isSuccess &&
-                  "We couldn't verify your email address"}
+                {isVerifying && "Please wait while we confirm your details"}
+                {verifyEmailMutation.isSuccess && "You can now access all platform features"}
+                {resendVerificationMutation.isSuccess && "We've sent a new link to your inbox"}
+                {hasError &&
+                  !isVerifying &&
+                  !isSuccess &&
+                  "The verification link is invalid or expired"}
               </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-4">
-              {/* Status Alert */}
-              <Alert
-                variant={
-                  isError && !verifyEmailMutation.isSuccess && !resendVerificationMutation.isSuccess
-                    ? "destructive"
-                    : "default"
-                }
-              >
-                {isError &&
-                !verifyEmailMutation.isSuccess &&
-                !resendVerificationMutation.isSuccess ? (
+              {/* Dynamic Status Alert */}
+              <Alert variant={hasError && !isSuccess ? "destructive" : "default"}>
+                {hasError && !isSuccess ? (
                   <AlertCircle className="size-4" />
                 ) : (
                   <Mail className="size-4" />
                 )}
-                <AlertDescription>{message}</AlertDescription>
+                <AlertDescription>{statusMessage}</AlertDescription>
               </Alert>
 
-              {/* Resend Form - Show when verification failed */}
-              {isError &&
-                !verifyEmailMutation.isPending &&
-                !verifyEmailMutation.isSuccess &&
-                !resendVerificationMutation.isSuccess && (
-                  <div className="space-y-3 pt-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="Enter your email"
-                        value={resendEmail}
-                        onChange={(e) => {
-                          setResendEmail(e.target.value);
-                          setEmailError("");
-                        }}
-                        disabled={resendVerificationMutation.isPending}
-                        className={emailError ? "border-destructive" : ""}
-                      />
-                      {emailError && <p className="text-destructive text-sm">{emailError}</p>}
-                    </div>
-
-                    <Button
-                      variant="outline"
-                      className="w-full"
-                      size="lg"
-                      onClick={handleResend}
-                      disabled={resendVerificationMutation.isPending || !resendEmail}
-                    >
-                      {resendVerificationMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 size-4 animate-spin" />
-                          Sending...
-                        </>
-                      ) : (
-                        "Resend Verification Email"
-                      )}
-                    </Button>
+              {/* Resend Form - Only show on Error and when not currently loading */}
+              {hasError && !isVerifying && !isSuccess && (
+                <div className="space-y-3 pt-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={resendEmail}
+                      onChange={(e) => {
+                        setResendEmail(e.target.value);
+                        setEmailError("");
+                      }}
+                      disabled={isResending}
+                      className={emailError ? "border-destructive" : ""}
+                    />
+                    {emailError && <p className="text-destructive text-sm">{emailError}</p>}
                   </div>
-                )}
 
-              {/* Action Buttons */}
-              {!verifyEmailMutation.isPending && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    size="lg"
+                    onClick={handleResend}
+                    disabled={isResending || !resendEmail}
+                  >
+                    {isResending ? (
+                      <>
+                        <Loader2 className="mr-2 size-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      "Resend Verification Email"
+                    )}
+                  </Button>
+                </div>
+              )}
+
+              {/* Primary Action Button */}
+              {!isVerifying && (
                 <div className="space-y-2 pt-2">
                   <Link to="/login" className="block">
                     <Button
                       className="w-full"
                       size="lg"
-                      variant={
-                        verifyEmailMutation.isSuccess || resendVerificationMutation.isSuccess
-                          ? "default"
-                          : "outline"
-                      }
+                      variant={isSuccess ? "default" : "outline"}
                     >
-                      {verifyEmailMutation.isSuccess || resendVerificationMutation.isSuccess
-                        ? "Continue to Login"
-                        : "Go to Login"}
+                      {isSuccess ? "Continue to Login" : "Go to Login"}
                     </Button>
                   </Link>
-
-                  {(verifyEmailMutation.isSuccess || resendVerificationMutation.isSuccess) && (
-                    <p className="text-muted-foreground text-center text-sm">
-                      You can now sign in with your verified email
-                    </p>
-                  )}
                 </div>
               )}
 
               {/* Help Text */}
-              {(isError || resendVerificationMutation.isSuccess) && (
+              {(hasError || resendVerificationMutation.isSuccess) && (
                 <div className="border-t pt-4">
                   <p className="text-muted-foreground text-center text-sm">
-                    Need help? Please contact us.
+                    Still having trouble? Please contact support.
                   </p>
                 </div>
               )}

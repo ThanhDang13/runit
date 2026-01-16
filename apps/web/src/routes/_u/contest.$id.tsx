@@ -312,7 +312,20 @@ function RouteComponent() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {contest.problems.length === 0 ? (
+                {status === "upcoming" ? (
+                  <div className="border-border/40 bg-muted/30 rounded-lg border px-6 py-12 text-center">
+                    <Clipboard
+                      className="text-muted-foreground mx-auto mb-3 h-12 w-12"
+                      aria-hidden="true"
+                    />
+                    <p className="text-foreground text-lg font-medium">
+                      Contest has not started yet
+                    </p>
+                    <p className="text-muted-foreground mt-1 text-sm">
+                      Starts at {startTime.toLocaleString()}
+                    </p>
+                  </div>
+                ) : contest.problems.length === 0 ? (
                   <div className="border-border/40 bg-muted/30 rounded-lg border px-6 py-12 text-center">
                     <Clipboard
                       className="text-muted-foreground mx-auto mb-3 h-12 w-12"
@@ -343,15 +356,13 @@ function RouteComponent() {
                             <span className="font-medium">{problem.title}</span>
                           </div>
 
-                          <div>
-                            <Badge
-                              variant="outline"
-                              className={cn("gap-1.5", statusConfig.className)}
-                            >
-                              <StatusIcon className="h-3 w-3" />
-                              {statusConfig.label}
-                            </Badge>
-                          </div>
+                          <Badge
+                            variant="outline"
+                            className={cn("gap-1.5", statusConfig.className)}
+                          >
+                            <StatusIcon className="h-3 w-3" />
+                            {statusConfig.label}
+                          </Badge>
                         </CardContent>
                       </Card>
                     );
@@ -423,7 +434,7 @@ function RouteComponent() {
                       const statusInfo = getStatusBadge(submission.status);
                       const StatusIcon = statusInfo.icon;
                       const isPending = submission.status === "pending";
-                      const isCurrentUser = submission.user.id === me?.id;
+                      const isCurrentUser = submission.user?.id === me?.id;
 
                       return (
                         <Card
@@ -442,7 +453,10 @@ function RouteComponent() {
                                   </div>
                                   <div className="text-muted-foreground mt-1 flex flex-wrap items-center gap-2 text-xs">
                                     <span>
-                                      by {submission.user.name || `User ${submission.user.id}`}
+                                      by{" "}
+                                      {submission.user
+                                        ? submission.user.name || `User ${submission.user.id}`
+                                        : "Unknown User"}
                                     </span>
                                     <span>•</span>
                                     <span>{new Date(submission.createdAt).toLocaleString()}</span>
@@ -548,7 +562,7 @@ function RouteComponent() {
                               {/* Name and Badge */}
                               <div className="flex min-w-0 items-center gap-2">
                                 <span className="text-foreground truncate text-sm font-semibold">
-                                  {participant.name}
+                                  {participant?.name ?? "Unknown participant"}
                                 </span>
                                 {isCurrentUser && (
                                   <Badge variant="default" className="shrink-0 text-xs">

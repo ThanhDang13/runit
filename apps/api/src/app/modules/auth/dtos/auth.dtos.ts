@@ -48,7 +48,8 @@ export class ResendVerificationRequestBodyDto extends createZodDto(
 ) {}
 
 export const AuthResponseSchema = z.object({
-  accessToken: z.string()
+  accessToken: z.string(),
+  isAdmin: z.boolean().default(false)
 });
 
 export class TokenPayloadResponseDto extends createZodDto(TokenPayloadSchema) {}

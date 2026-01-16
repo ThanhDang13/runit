@@ -42,6 +42,11 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"form">)
       login({
         token: data.accessToken
       });
+      if (data.isAdmin) {
+        navigate({ to: "/admin" });
+        toast.success("Welcome Admin!");
+        return;
+      }
       navigate({ to: "/" });
       toast.success("Login successful!");
     },

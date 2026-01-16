@@ -44,7 +44,8 @@ export class LoginHandler implements ICommandHandler<LoginCommand, AuthResponseD
     });
 
     return {
-      accessToken
+      accessToken,
+      isAdmin: user.role === "admin"
     };
   }
 }

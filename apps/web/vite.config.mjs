@@ -12,7 +12,7 @@ export default defineConfig(() => ({
   server: {
     port: 4200,
     host: true,
-    allowedHosts: [""]
+    allowedHosts: ["highland-trademarks-leo-corn.trycloudflare.com"]
   },
   preview: {
     port: 4200,

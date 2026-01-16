@@ -54,4 +54,8 @@ export class SubmissionService {
       .returning();
     return submission;
   }
+
+  async deleteSubmission(submissionId: string): Promise<void> {
+    await this.db.delete(submissions).where(eq(submissions.id, submissionId));
+  }
 }

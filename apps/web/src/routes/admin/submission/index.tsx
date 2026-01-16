@@ -12,7 +12,11 @@ import { Checkbox } from "@web/components/ui/checkbox";
 import { useMemo, useState } from "react";
 import { useInfiniteQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useDebounce } from "@web/hooks/use-debounce";
-import { createGetProblemsInfiniteQueryOptions, Problem } from "@web/lib/tanstack/options/problem";
+import {
+  createGetSubmissionsInfiniteQueryOptions,
+  Submission,
+  SubmissionStatus
+} from "@web/lib/tanstack/options/submission";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +25,7 @@ import {
   DropdownMenuTrigger
 } from "@web/components/ui/dropdown-menu";
 import { Button } from "@web/components/ui/button";
-import { Copy, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
+import { Copy, MoreHorizontal, Eye, Trash2 } from "lucide-react";
 import { Badge } from "@web/components/ui/badge";
 import { toast } from "sonner";
 import {
@@ -35,13 +39,42 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from "@web/components/ui/alert-dialog";
-import { createDeleteProblemMutationOptions } from "@web/lib/tanstack/options/problem";
+import { createDeleteSubmissionMutationOptions } from "@web/lib/tanstack/options/submission";
+import { Sheet, SheetContent, SheetTrigger } from "@web/components/ui/sheet";
+import { SubmissionSummarySheet } from "@web/components/submission-summary-sheet";
 
-export const Route = createFileRoute("/admin/problem/")({
-  component: AdminProblems
+export const Route = createFileRoute("/admin/submission/")({
+  component: AdminSubmissions
 });
 
-export const createColumns = (onDelete: (id: string) => void): ColumnDef<Problem>[] => [
+const submissionStatusVariantMap: Record<
+  SubmissionStatus,
+  "default" | "destructive" | "secondary" | "outline"
+> = {
+  pending: "secondary",
+  accepted: "default",
+  wrong_answer: "destructive",
+  time_limit_exceeded: "secondary",
+  runtime_error: "outline",
+  compilation_error: "outline"
+};
+
+const submissionStatusLabelMap: Record<SubmissionStatus, string> = {
+  pending: "Pending",
+  accepted: "Accepted",
+  wrong_answer: "Wrong Answer",
+  time_limit_exceeded: "Time Limit Exceeded",
+  runtime_error: "Runtime Error",
+  compilation_error: "Compilation Error"
+};
+
+export function SubmissionVerdictBadge({ status }: { status: Submission["status"] }) {
+  return (
+    <Badge variant={submissionStatusVariantMap[status]}>{submissionStatusLabelMap[status]}</Badge>
+  );
+}
+
+export const createColumns = (onDelete: (id: string) => void): ColumnDef<Submission>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -50,60 +83,52 @@ export const createColumns = (onDelete: (id: string) => void): ColumnDef<Problem
           table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
       />
-    ),
-    enableSorting: false,
-    enableHiding: false
+    )
   },
   {
-    accessorKey: "title",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />
+    id: "user",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="User" />,
+    cell: ({ row }) => row.original.user?.name ?? "Deleted User"
   },
   {
-    accessorKey: "difficulty",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Difficulty" />,
-    cell: ({ row }) => {
-      const difficulty = row.original.difficulty.toLowerCase();
-
-      const difficultyClassMap: Record<string, string> = {
-        easy: "bg-green-100 text-green-800",
-        medium: "bg-yellow-100 text-yellow-800",
-        hard: "bg-red-100 text-red-800"
-      };
-
-      const classes = difficultyClassMap[difficulty] ?? "bg-gray-100 text-gray-800";
-
-      return (
-        <Badge variant="outline" className={classes}>
-          {row.original.difficulty}
-        </Badge>
-      );
-    }
+    id: "problem",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Problem" />,
+    cell: ({ row }) => row.original.problem.title
+  },
+  {
+    id: "verdict",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Verdict" />,
+    cell: ({ row }) => <SubmissionVerdictBadge status={row.original.status} />
+  },
+  {
+    accessorKey: "language",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Language" />
+  },
+  {
+    id: "passed",
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Passed" />,
+    cell: ({ row }) => `${row.original.summary.totalPassed}/${row.original.summary.total}`
   },
   {
     accessorKey: "createdAt",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Created At" />,
-    cell: ({ row }) => {
-      const date = new Date(row.original.createdAt);
-      return date.toLocaleString(undefined, {
+    header: ({ column }) => <DataTableColumnHeader column={column} title="Submitted At" />,
+    cell: ({ row }) =>
+      new Date(row.original.createdAt).toLocaleString(undefined, {
         dateStyle: "medium",
         timeStyle: "short"
-      });
-    }
+      })
   },
   {
     id: "actions",
     cell: ({ row }) => {
       const id = row.original.id;
-
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -115,20 +140,28 @@ export const createColumns = (onDelete: (id: string) => void): ColumnDef<Problem
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-            <DropdownMenuItem
-              className="w-full cursor-pointer"
-              onClick={async () => await navigator.clipboard.writeText(id)}
-            >
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(id)}>
               <Copy className="mr-2 h-4 w-4" />
               Copy ID
             </DropdownMenuItem>
 
-            <Link to="/admin/problem/$id" params={{ id }} className="flex">
-              <DropdownMenuItem className="w-full">
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </DropdownMenuItem>
-            </Link>
+            <Sheet>
+              <SheetTrigger asChild>
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                  }}
+                  className="w-full"
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  View
+                </DropdownMenuItem>
+              </SheetTrigger>
+
+              <SheetContent side="right" className="w-full max-w-2/5 p-0">
+                <SubmissionSummarySheet submission={row.original} isCurrentUser={false} />
+              </SheetContent>
+            </Sheet>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
@@ -143,9 +176,9 @@ export const createColumns = (onDelete: (id: string) => void): ColumnDef<Problem
 
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete this problem?</AlertDialogTitle>
+                  <AlertDialogTitle>Delete this submission?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently remove the problem.
+                    This action cannot be undone. This will permanently remove the submission.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
 
@@ -167,26 +200,26 @@ export const createColumns = (onDelete: (id: string) => void): ColumnDef<Problem
   }
 ];
 
-interface DeleteSelectedProblemsProps {
+interface DeleteSelectedSubmissionsProps {
   ids: string[];
   onDone?: () => void;
 }
 
-export function DeleteSelectedProblems({ ids, onDone }: DeleteSelectedProblemsProps) {
+export function DeleteSelectedSubmissions({ ids, onDone }: DeleteSelectedSubmissionsProps) {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    ...createDeleteProblemMutationOptions(),
+    ...createDeleteSubmissionMutationOptions(),
     onError: () => {
       toast.error("Delete failed", {
-        description: "Some problems could not be deleted."
+        description: "Some submissions could not be deleted."
       });
     },
     onSuccess: () => {
-      toast("Problems deleted", {
-        description: `${ids.length} problems removed.`
+      toast("Submissions deleted", {
+        description: `${ids.length} submissions removed.`
       });
-      queryClient.invalidateQueries({ queryKey: ["problems"] });
+      queryClient.invalidateQueries({ queryKey: ["submissions"] });
       onDone?.();
     }
   });
@@ -195,7 +228,7 @@ export function DeleteSelectedProblems({ ids, onDone }: DeleteSelectedProblemsPr
     try {
       await Promise.all(ids.map((id) => mutation.mutateAsync({ id })));
     } catch (error) {
-      console.error("Error deleting problems:", error);
+      console.error("Error deleting submissions:", error);
     }
   };
 
@@ -212,7 +245,7 @@ export function DeleteSelectedProblems({ ids, onDone }: DeleteSelectedProblemsPr
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete {ids.length} problems?</AlertDialogTitle>
+          <AlertDialogTitle>Delete {ids.length} submissions?</AlertDialogTitle>
           <AlertDialogDescription>This action cannot be undone.</AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -227,55 +260,52 @@ export function DeleteSelectedProblems({ ids, onDone }: DeleteSelectedProblemsPr
   );
 }
 
-function AdminProblems() {
+function AdminSubmissions() {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 20 });
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([{ id: "createdAt", desc: true }]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const filterValue = (columnFilters.find((f) => f.id === "title")?.value as string) ?? "";
-  const debouncedFilter = useDebounce(filterValue, 300);
-
-  const { data, isLoading } = useInfiniteQuery(
-    createGetProblemsInfiniteQueryOptions({
+  const { data } = useInfiniteQuery(
+    createGetSubmissionsInfiniteQueryOptions({
       page: pagination.pageIndex + 1,
       limit: pagination.pageSize,
       sort: sorting[0]?.id ?? "createdAt",
       order: sorting[0]?.desc ? "desc" : "asc",
-      keyword: debouncedFilter
+      userId: undefined
     })
   );
 
   const queryClient = useQueryClient();
 
-  const deleteProblemMutation = useMutation({
-    ...createDeleteProblemMutationOptions(),
+  const deleteSubmissionMutation = useMutation({
+    ...createDeleteSubmissionMutationOptions(),
     onSuccess: () => {
-      toast("Problem deleted", {
-        description: "The problem has been successfully removed."
+      toast("Submission deleted", {
+        description: "The submission has been successfully removed."
       });
 
-      queryClient.invalidateQueries({ queryKey: ["problems"] });
+      queryClient.invalidateQueries({ queryKey: ["submissions"] });
     },
     onError: () => {
       toast.error("Delete failed", {
-        description: "Could not delete the problem. Please try again."
+        description: "Could not delete the submission. Please try again."
       });
     }
   });
 
-  const problems = useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data]);
+  const submissions = useMemo(() => data?.pages.flatMap((p) => p.data) ?? [], [data]);
   const total = useMemo(() => data?.pages[0]?.total ?? 0, [data]);
 
   const columns = useMemo(
     () =>
       createColumns((id) => {
-        deleteProblemMutation.mutate({ id });
+        deleteSubmissionMutation.mutate({ id });
       }),
-    [deleteProblemMutation]
+    [deleteSubmissionMutation]
   );
 
   const table = useReactTable({
-    data: problems,
+    data: submissions,
     columns,
     manualPagination: true,
     manualSorting: true,
@@ -291,20 +321,13 @@ function AdminProblems() {
   const selectedIds = table.getSelectedRowModel().rows.map((row) => row.original.id);
 
   return (
-    <div className="container mx-auto flex flex-col gap-4 px-4 py-8">
+    <div className="container mx-auto flex h-full flex-1 flex-col gap-4 px-4">
       <DataTable
         table={table}
-        filterKey="title"
+        filterable={false}
+        filterKey="user"
         toolbarRight={
-          <>
-            <DeleteSelectedProblems ids={selectedIds} onDone={() => table.resetRowSelection()} />
-            <Link to="/admin/problem/new">
-              <Button size="sm" variant="outline" className="ml-auto">
-                <Plus className="h-4 w-4" />
-                New Problem
-              </Button>
-            </Link>
-          </>
+          <DeleteSelectedSubmissions ids={selectedIds} onDone={() => table.resetRowSelection()} />
         }
       />
     </div>

@@ -14,6 +14,7 @@ import {
 
 interface DataTableProps<TData> {
   table: TanStackTable<TData>;
+  filterable?: boolean;
   filterKey?: string;
   filterKeyPlaceholder?: string;
   toolbarLeft?: React.ReactNode;
@@ -22,6 +23,7 @@ interface DataTableProps<TData> {
 
 export function DataTable<TData>({
   table,
+  filterable = true,
   filterKey = "title",
   filterKeyPlaceholder,
   toolbarLeft,
@@ -33,12 +35,14 @@ export function DataTable<TData>({
       <div className="shrink-0 py-4">
         <div className="flex h-8 items-center justify-between gap-2">
           <div className="flex h-full items-center gap-2">
-            <Input
-              placeholder={`Filter by ${filterKeyPlaceholder || filterKey}...`}
-              value={(table.getColumn(filterKey)?.getFilterValue() as string) ?? ""}
-              onChange={(e) => table.getColumn(filterKey)?.setFilterValue(e.target.value)}
-              className="h-full max-w-sm px-3 py-0 text-sm leading-none"
-            />
+            {filterable && (
+              <Input
+                placeholder={`Filter by ${filterKeyPlaceholder || filterKey}...`}
+                value={(table.getColumn(filterKey)?.getFilterValue() as string) ?? ""}
+                onChange={(e) => table.getColumn(filterKey)?.setFilterValue(e.target.value)}
+                className="h-full max-w-sm px-3 py-0 text-sm leading-none"
+              />
+            )}
             {toolbarLeft}
           </div>
 

@@ -23,10 +23,13 @@ import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-pass
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/_auth/forgot-password'
 import { Route as AdminUserIndexRouteImport } from './routes/admin/user/index'
+import { Route as AdminSubmissionIndexRouteImport } from './routes/admin/submission/index'
 import { Route as AdminProblemIndexRouteImport } from './routes/admin/problem/index'
 import { Route as AdminContestIndexRouteImport } from './routes/admin/contest/index'
 import { Route as AdminProblemNewRouteImport } from './routes/admin/problem/new'
 import { Route as AdminProblemIdRouteImport } from './routes/admin/problem/$id'
+import { Route as AdminContestNewRouteImport } from './routes/admin/contest/new'
+import { Route as AdminContestIdRouteImport } from './routes/admin/contest/$id'
 import { Route as UProblemIdRouteImport } from './routes/_u/problem.$id'
 import { Route as UContestIdRouteImport } from './routes/_u/contest.$id'
 import { Route as UCContestContestIdProblemProblemIdRouteImport } from './routes/_u/_c.contest.$contestId.problem.$problemId'
@@ -100,6 +103,11 @@ const AdminUserIndexRoute = AdminUserIndexRouteImport.update({
   path: '/user/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSubmissionIndexRoute = AdminSubmissionIndexRouteImport.update({
+  id: '/submission/',
+  path: '/submission/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminProblemIndexRoute = AdminProblemIndexRouteImport.update({
   id: '/problem/',
   path: '/problem/',
@@ -118,6 +126,16 @@ const AdminProblemNewRoute = AdminProblemNewRouteImport.update({
 const AdminProblemIdRoute = AdminProblemIdRouteImport.update({
   id: '/problem/$id',
   path: '/problem/$id',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminContestNewRoute = AdminContestNewRouteImport.update({
+  id: '/contest/new',
+  path: '/contest/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminContestIdRoute = AdminContestIdRouteImport.update({
+  id: '/contest/$id',
+  path: '/contest/$id',
   getParentRoute: () => AdminRoute,
 } as any)
 const UProblemIdRoute = UProblemIdRouteImport.update({
@@ -152,10 +170,13 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AdminIndexRoute
   '/contest/$id': typeof UContestIdRoute
   '/problem/$id': typeof UProblemIdRoute
+  '/admin/contest/$id': typeof AdminContestIdRoute
+  '/admin/contest/new': typeof AdminContestNewRoute
   '/admin/problem/$id': typeof AdminProblemIdRoute
   '/admin/problem/new': typeof AdminProblemNewRoute
   '/admin/contest': typeof AdminContestIndexRoute
   '/admin/problem': typeof AdminProblemIndexRoute
+  '/admin/submission': typeof AdminSubmissionIndexRoute
   '/admin/user': typeof AdminUserIndexRoute
   '/contest/$contestId/problem/$problemId': typeof UCContestContestIdProblemProblemIdRoute
 }
@@ -173,10 +194,13 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/contest/$id': typeof UContestIdRoute
   '/problem/$id': typeof UProblemIdRoute
+  '/admin/contest/$id': typeof AdminContestIdRoute
+  '/admin/contest/new': typeof AdminContestNewRoute
   '/admin/problem/$id': typeof AdminProblemIdRoute
   '/admin/problem/new': typeof AdminProblemNewRoute
   '/admin/contest': typeof AdminContestIndexRoute
   '/admin/problem': typeof AdminProblemIndexRoute
+  '/admin/submission': typeof AdminSubmissionIndexRoute
   '/admin/user': typeof AdminUserIndexRoute
   '/contest/$contestId/problem/$problemId': typeof UCContestContestIdProblemProblemIdRoute
 }
@@ -197,10 +221,13 @@ export interface FileRoutesById {
   '/admin/': typeof AdminIndexRoute
   '/_u/contest/$id': typeof UContestIdRoute
   '/_u/problem/$id': typeof UProblemIdRoute
+  '/admin/contest/$id': typeof AdminContestIdRoute
+  '/admin/contest/new': typeof AdminContestNewRoute
   '/admin/problem/$id': typeof AdminProblemIdRoute
   '/admin/problem/new': typeof AdminProblemNewRoute
   '/admin/contest/': typeof AdminContestIndexRoute
   '/admin/problem/': typeof AdminProblemIndexRoute
+  '/admin/submission/': typeof AdminSubmissionIndexRoute
   '/admin/user/': typeof AdminUserIndexRoute
   '/_u/_c/contest/$contestId/problem/$problemId': typeof UCContestContestIdProblemProblemIdRoute
 }
@@ -221,10 +248,13 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/contest/$id'
     | '/problem/$id'
+    | '/admin/contest/$id'
+    | '/admin/contest/new'
     | '/admin/problem/$id'
     | '/admin/problem/new'
     | '/admin/contest'
     | '/admin/problem'
+    | '/admin/submission'
     | '/admin/user'
     | '/contest/$contestId/problem/$problemId'
   fileRoutesByTo: FileRoutesByTo
@@ -242,10 +272,13 @@ export interface FileRouteTypes {
     | '/admin'
     | '/contest/$id'
     | '/problem/$id'
+    | '/admin/contest/$id'
+    | '/admin/contest/new'
     | '/admin/problem/$id'
     | '/admin/problem/new'
     | '/admin/contest'
     | '/admin/problem'
+    | '/admin/submission'
     | '/admin/user'
     | '/contest/$contestId/problem/$problemId'
   id:
@@ -265,10 +298,13 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/_u/contest/$id'
     | '/_u/problem/$id'
+    | '/admin/contest/$id'
+    | '/admin/contest/new'
     | '/admin/problem/$id'
     | '/admin/problem/new'
     | '/admin/contest/'
     | '/admin/problem/'
+    | '/admin/submission/'
     | '/admin/user/'
     | '/_u/_c/contest/$contestId/problem/$problemId'
   fileRoutesById: FileRoutesById
@@ -383,6 +419,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUserIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/submission/': {
+      id: '/admin/submission/'
+      path: '/submission'
+      fullPath: '/admin/submission'
+      preLoaderRoute: typeof AdminSubmissionIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/problem/': {
       id: '/admin/problem/'
       path: '/problem'
@@ -409,6 +452,20 @@ declare module '@tanstack/react-router' {
       path: '/problem/$id'
       fullPath: '/admin/problem/$id'
       preLoaderRoute: typeof AdminProblemIdRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/contest/new': {
+      id: '/admin/contest/new'
+      path: '/contest/new'
+      fullPath: '/admin/contest/new'
+      preLoaderRoute: typeof AdminContestNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/contest/$id': {
+      id: '/admin/contest/$id'
+      path: '/contest/$id'
+      fullPath: '/admin/contest/$id'
+      preLoaderRoute: typeof AdminContestIdRouteImport
       parentRoute: typeof AdminRoute
     }
     '/_u/problem/$id': {
@@ -462,19 +519,25 @@ const URouteWithChildren = URoute._addFileChildren(URouteChildren)
 
 interface AdminRouteChildren {
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminContestIdRoute: typeof AdminContestIdRoute
+  AdminContestNewRoute: typeof AdminContestNewRoute
   AdminProblemIdRoute: typeof AdminProblemIdRoute
   AdminProblemNewRoute: typeof AdminProblemNewRoute
   AdminContestIndexRoute: typeof AdminContestIndexRoute
   AdminProblemIndexRoute: typeof AdminProblemIndexRoute
+  AdminSubmissionIndexRoute: typeof AdminSubmissionIndexRoute
   AdminUserIndexRoute: typeof AdminUserIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminIndexRoute: AdminIndexRoute,
+  AdminContestIdRoute: AdminContestIdRoute,
+  AdminContestNewRoute: AdminContestNewRoute,
   AdminProblemIdRoute: AdminProblemIdRoute,
   AdminProblemNewRoute: AdminProblemNewRoute,
   AdminContestIndexRoute: AdminContestIndexRoute,
   AdminProblemIndexRoute: AdminProblemIndexRoute,
+  AdminSubmissionIndexRoute: AdminSubmissionIndexRoute,
   AdminUserIndexRoute: AdminUserIndexRoute,
 }
 

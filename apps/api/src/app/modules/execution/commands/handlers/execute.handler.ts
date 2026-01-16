@@ -35,8 +35,6 @@ export class ExecuteHandler implements ICommandHandler<ExecuteCommand> {
           const execResult = await this.engine.execute(code, language, test.input);
           const { output, exitCode } = execResult;
 
-          console.log(execResult);
-
           if (exitCode === null) {
             return {
               execResult: {
