@@ -85,6 +85,8 @@ export const testcases = pgTable("testcases", {
   ...timestamp
 });
 
+// ------------------- SUBMISSIONS -------------------
+
 export const submissions = pgTable("submissions", {
   id: text("id")
     .primaryKey()
